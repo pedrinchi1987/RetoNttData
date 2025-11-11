@@ -45,8 +45,12 @@ stages:
           - script: |
               dotnet tool install --global dotnet-sonarscanner
               export PATH="$PATH:/root/.dotnet/tools"
-              dotnet sonarscanner begin /k:"devops-service" /o:"azure-pedrinchi" /d:sonar.scanner.skipJreProvisioning=true /d:sonar.sources="src/DevOpsService" /d:sonar.cs.vscoveragexml.reportsPaths="coverage.xml"
-              dotnet build
+              dotnet sonarscanner begin /k:"devops-service" /o:"azure-pedrinchi" /d:sonar.scanner.skipJreProvisioning=true /d:sonar.sources="src/DevOpsService" /d:sonar.cs.vscoveragexml.reportsPaths="coverage.xml"              
+              dotnet restore
+              dotnet build -c Release
+              cd ../../tests/DevOpsService.Tests
+              dotnet test --no-build --verbosity normal
+              cd ../../
               dotnet sonarscanner end
             displayName: 'Run SonarCloud Analysis'
 
