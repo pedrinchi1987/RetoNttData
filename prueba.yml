@@ -131,11 +131,14 @@ stages:
         - script: |
             dotnet tool install --global dotnet-sonarscanner
             export PATH="$PATH:/root/.dotnet/tools"
-            dotnet sonarscanner begin /k:"$(sonarProjectKey)" /o:"$(sonarOrganization)" /d:sonar.branch.name="master"
+            #dotnet sonarscanner begin /k:"$(sonarProjectKey)" /o:"$(sonarOrganization)" /d:sonar.branch.name="master"
             dotnet build src/DevOpsService/DevOpsService.csproj -c $(buildConfiguration)
-            dotnet sonarscanner end
+            dotnet test tests/DevOpsService.Tests/DevOpsService.Tests.csproj --configuration $(buildConfiguration) --logger "trx;LogFileName=test-results.trx" --no-build
+            #dotnet sonarscanner end
           displayName: 'Run Sonar scanner'
+        
         - task: SonarCloudAnalyze@1
+        
         - task: SonarCloudPublish@1
           inputs:
             pollingTimeoutSec: '300'
