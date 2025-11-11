@@ -39,7 +39,7 @@ variables:
   imageTag: $(Build.BuildId) 
   # Service connections and secrets (must create these in Azure DevOps project)
   awsEcrServiceConnection: 'AWS_ECR_SERVICE_CONNECTION'   # Docker@2 uses this
-  awsCredentialsEnvVar: 'AWS'                            # We will pass AWS_ACCESS_KEY_ID & AWS_SECRET_ACCESS_KEY
+  awsCredentialsEnvVar: 'Amazon_Pedrinchi'                            # We will pass AWS_ACCESS_KEY_ID & AWS_SECRET_ACCESS_KEY
   sonarCloudServiceConnection: 'SonarOnline'
   sonarOrganization: 'pmontenegro'                    # change
   sonarProjectKey: 'devops-service'
@@ -51,8 +51,6 @@ stages:
 #########################
 - stage: Deploy_Staging
   displayName: 'Deploy to Staging'
-  dependsOn: PublishImage
-  condition: or(succeeded(), eq(parameters.deployTo, 'staging'))
   jobs:
     - deployment: DeployToStaging
       displayName: 'Terraform apply -> Staging'
