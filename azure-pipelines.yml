@@ -35,12 +35,12 @@ stages:
           - task: SonarCloudPrepare@1
             inputs:
               SonarCloud: 'SonarOnline'
-              organization: 'Azure-Pedrinchi'
+              organization: 'azure-pedrinchi'
               scannerMode: 'MSBuild'
               projectKey: 'devops-service'
 
           - script: |
-              dotnet sonarscanner begin /k:"devops-service" /o:"Azure-Pedrinchi"
+              dotnet sonarscanner begin /k:"devops-service" /o:"azure-pedrinchi"
               dotnet build
               dotnet sonarscanner end
             displayName: 'Run SonarCloud Analysis'
