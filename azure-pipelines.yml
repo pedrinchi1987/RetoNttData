@@ -1,0 +1,44 @@
+trigger:
+  branches:
+    include:
+      - master
+      - develop
+
+variables:
+  awsRegion: 'us-east-1'
+  ecrRepository: 'devops-service'
+  imageTag: '$(Build.BuildId)'
+  serviceName: 'devops-service'
+
+stages:
+  - stage: Build
+    displayName: Build and Test
+    jobs:
+      - job: Build
+        pool:
+          vmImage: 'ubuntu-latest'
+        steps:
+          - task: UseDotNet@2
+            inputs:
+              packageType: 'sdk'
+              version: '8.0.x'
+
+          - script: |
+              dotnet restore
+              dotnet build -c Release
+              dotnet test --no-build --verbosity normal
+            displayName: 'Restore Build Test'
+
+          - task: SonarCloudPrepare@1
+            inputs:
+              SonarCloud: 'SonarOnline'
+              organization: 'Azure-Pedrinchi'
+              scannerMode: 'MSBuild'
+              projectKey: 'devops-service'
+
+          - script: |
+              dotnet sonarscanner begin /k:"devops-service" /o:"Azure-Pedrinchi"
+              dotnet build
+              dotnet sonarscanner end
+            displayName: 'Run SonarCloud Analysis'
+
