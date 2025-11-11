@@ -131,7 +131,7 @@ stages:
         - script: |
             dotnet tool install --global dotnet-sonarscanner
             export PATH="$PATH:/root/.dotnet/tools"
-            dotnet sonarscanner begin /k:"$(sonarProjectKey)" /o:"$(sonarOrganization)"
+            dotnet sonarscanner begin /k:"$(sonarProjectKey)" /o:"$(sonarOrganization)" /d:sonar.branch.name=master
             dotnet build src/DevOpsService/DevOpsService.csproj -c $(buildConfiguration)
             dotnet sonarscanner end
           displayName: 'Run Sonar scanner'
