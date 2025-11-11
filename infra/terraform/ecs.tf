@@ -1,3 +1,4 @@
+/*
 resource "aws_ecs_cluster" "devops_cluster" {
   name = "${var.service_name}-cluster"
 }
@@ -64,3 +65,4 @@ resource "aws_ecs_service" "devops_service" {
     aws_lb_listener.devops_listener
   ]
 }
+*/

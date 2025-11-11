@@ -1,3 +1,4 @@
+/*
 resource "aws_appautoscaling_target" "ecs_target" {
   max_capacity       = 5
   min_capacity       = 2
@@ -19,3 +20,4 @@ resource "aws_appautoscaling_policy" "cpu_scale_up" {
     }
   }
 }
+*/

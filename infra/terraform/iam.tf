@@ -1,5 +1,6 @@
 data "aws_caller_identity" "current" {}
 
+/*
 resource "aws_iam_role" "ecs_task_execution_role" {
   name = "ecsTaskExecutionRole"
 
@@ -160,3 +161,4 @@ output "lambda_exec_role_arn" {
 output "terraform_deploy_role_arn" {
   value = aws_iam_role.terraform_deploy_role.arn
 }
+*/

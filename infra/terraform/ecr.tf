@@ -1,3 +1,4 @@
+/*
 resource "aws_ecr_repository" "devops_repo" {
   name                 = var.service_name
   image_tag_mutability = "MUTABLE"
@@ -5,3 +6,4 @@ resource "aws_ecr_repository" "devops_repo" {
     scan_on_push = true
   }
 }
+*/

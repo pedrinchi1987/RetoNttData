@@ -1,3 +1,4 @@
+/*
 resource "aws_lambda_function" "jwt_authorizer" {
   filename         = "${path.module}/lambda/lambda_authorizer.zip"
   function_name    = "${var.service_name}-jwt-authorizer"
@@ -19,3 +20,4 @@ resource "aws_lambda_permission" "api_gateway_invoke" {
   function_name = aws_lambda_function.jwt_authorizer.function_name
   principal     = "apigateway.amazonaws.com"
 }
+*/

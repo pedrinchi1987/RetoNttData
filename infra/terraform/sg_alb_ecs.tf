@@ -1,3 +1,4 @@
+/*
 resource "aws_security_group" "alb_sg" {
   name        = "${var.service_name}-alb-sg"
   description = "Allow HTTP inbound"
@@ -37,3 +38,4 @@ resource "aws_security_group" "ecs_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
+*/

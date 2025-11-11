@@ -1,3 +1,4 @@
+/*
 resource "aws_api_gateway_rest_api" "devops_api" {
   name        = "${var.service_name}-api"
   description = "API Gateway for DevOps Microservice"
@@ -38,3 +39,4 @@ resource "aws_api_gateway_authorizer" "devops_authorizer" {
   identity_source                  = "method.request.header.X-JWT-KWY"
   type                             = "REQUEST"
 }
+*/

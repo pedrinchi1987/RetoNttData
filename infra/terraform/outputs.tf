@@ -1,3 +1,4 @@
+/*
 output "ecr_repository_url" {
   value = aws_ecr_repository.devops_repo.repository_url
 }
@@ -13,3 +14,4 @@ output "api_gateway_id" {
 output "ecs_cluster_name" {
   value = aws_ecs_cluster.devops_cluster.name
 }
+*/
