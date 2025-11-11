@@ -10,6 +10,13 @@ terraform {
       version = "~> 3.5"
     }
   }
+  
+  cloud {
+    organization = "Pmontenegro"
+    workspaces {
+      name = "RetoNttData"
+    }
+  }
 }
 
 provider "aws" {

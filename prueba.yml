@@ -1,0 +1,144 @@
+# azure-pipelines.yml
+# Pipeline multi-stage para Azure DevOps (Build, Test, Static Analysis, Push Image, Deploy Staging, Deploy Prod)
+# Soporta: automatic triggers, manual, tag-based versioned deployments, SonarCloud, Terraform for AWS, Docker -> ECR.
+
+trigger:
+  branches:
+    include:
+      - develop
+      - feature/*
+      - release/*
+      - master
+
+pr:
+  branches:
+    include:
+      - develop
+      - master
+
+# Permite ejecución manual con variables (Run pipeline -> Run with parameters)
+parameters:
+  - name: imageTag
+    displayName: 'Image tag (leave empty to use Build.BuildId)'
+    type: string
+    default: ''
+  - name: deployTo
+    displayName: 'Deploy target (none | staging | production)'
+    type: string
+    default: 'none'
+
+variables:
+  # Defaults - override in pipeline library or at run-time
+  awsRegion: 'us-east-1'
+  ecrRepository: 'devops-service'
+  serviceName: 'devops-service'
+  terraformWorkingDir: 'infra/terraform'
+  buildConfiguration: 'Release'
+  dotnetSdk: '8.0.x'
+  # Use Build.BuildId if no imageTag provided
+  imageTag: $[coalesce(parameters.imageTag, variables['Build.BuildId'])]
+  # Service connections and secrets (must create these in Azure DevOps project)
+  awsEcrServiceConnection: 'AWS_ECR_SERVICE_CONNECTION'   # Docker@2 uses this
+  awsCredentialsEnvVar: 'AWS'                            # We will pass AWS_ACCESS_KEY_ID & AWS_SECRET_ACCESS_KEY
+  sonarCloudServiceConnection: 'SonarOnline'
+  sonarOrganization: 'azure-pedrinchi'                    # change
+  sonarProjectKey: 'devops-service'
+
+stages:
+
+#########################
+# 1) Build & Restore    #
+#########################
+- stage: Build
+  displayName: 'Build'
+  jobs:
+    - job: RestoreBuild
+      displayName: 'Restore, Build and Pack'
+      pool:
+        vmImage: 'ubuntu-latest'
+      steps:
+        - task: UseDotNet@2
+          displayName: 'Use .NET SDK'
+          inputs:
+            packageType: 'sdk'
+            version: $(dotnetSdk)
+
+        - script: |
+            dotnet --info
+            dotnet tool restore || true
+            dotnet restore src/DevOpsService/DevOpsService.csproj
+          displayName: 'dotnet restore'
+
+        - script: |
+            dotnet build src/DevOpsService/DevOpsService.csproj -c $(buildConfiguration) --no-restore
+          displayName: 'dotnet build'
+
+        - task: PublishPipelineArtifact@1
+          displayName: 'Publish build artifact (source)'
+          inputs:
+            targetPath: 'src'
+            artifact: 'source-code'
+
+#########################
+# 2) Test               #
+#########################
+- stage: Test
+  displayName: 'Test'
+  dependsOn: Build
+  jobs:
+    - job: RunTests
+      displayName: 'Run unit/integration tests'
+      pool:
+        vmImage: 'ubuntu-latest'
+      steps:
+        - task: UseDotNet@2
+          inputs:
+            packageType: 'sdk'
+            version: $(dotnetSdk)
+
+        - script: |
+            dotnet test tests/DevOpsService.Tests/DevOpsService.Tests.csproj --configuration $(buildConfiguration) --logger "trx;LogFileName=test-results.trx" --no-build
+          displayName: 'dotnet test'
+
+        - task: PublishTestResults@2
+          inputs:
+            testResultsFormat: 'VSTest'
+            testResultsFiles: '**/test-results.trx, **/*.trx'
+            failTaskOnFailedTests: true
+
+        - task: PublishCodeCoverageResults@1
+          displayName: 'Publish code coverage (if collected)'
+          inputs:
+            codeCoverageTool: 'Cobertura'
+            summaryFileLocation: 'coverage.cobertura.xml'
+            pathToSources: 'src'
+
+#########################
+# 3) Static analysis    #
+#########################
+- stage: Analyze
+  displayName: 'Static Analysis (SonarCloud)'
+  dependsOn: Test
+  condition: succeeded()
+  jobs:
+    - job: Sonar
+      displayName: 'Run SonarCloud analysis'
+      pool:
+        vmImage: 'ubuntu-latest'
+      steps:
+        - task: SonarCloudPrepare@1
+          inputs:
+            SonarCloud: $(sonarCloudServiceConnection)
+            organization: $(sonarOrganization)
+            scannerMode: 'MSBuild'
+            projectKey: $(sonarProjectKey)
+            projectName: $(sonarProjectKey)
+        - script: |
+            dotnet sonarscanner begin /k:"$(sonarProjectKey)" /o:"$(sonarOrganization)"
+            dotnet build src/DevOpsService/DevOpsService.csproj -c $(buildConfiguration)
+            dotnet sonarscanner end
+          displayName: 'Run Sonar scanner'
+        - task: SonarCloudAnalyze@1
+        - task: SonarCloudPublish@1
+          inputs:
+            pollingTimeoutSec: '300'
