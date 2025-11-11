@@ -36,7 +36,7 @@ variables:
   buildConfiguration: 'Release'
   dotnetSdk: '8.0.x'
   # Use Build.BuildId if no imageTag provided
-  imageTag: $(Build.BuildId)
+  imageTag: $(Build.BuildId) 
   # Service connections and secrets (must create these in Azure DevOps project)
   awsEcrServiceConnection: 'AWS_ECR_SERVICE_CONNECTION'   # Docker@2 uses this
   awsCredentialsEnvVar: 'AWS'                            # We will pass AWS_ACCESS_KEY_ID & AWS_SECRET_ACCESS_KEY
@@ -73,11 +73,6 @@ stages:
             dotnet build src/DevOpsService/DevOpsService.csproj -c $(buildConfiguration) --no-restore
           displayName: 'dotnet build'
 
-        - task: PublishPipelineArtifact@1
-          displayName: 'Publish build artifact (source)'
-          inputs:
-            targetPath: 'src'
-            artifact: 'source-code'
 
 #########################
 # 2) Test               #
@@ -134,6 +129,8 @@ stages:
             projectKey: $(sonarProjectKey)
             projectName: $(sonarProjectKey)
         - script: |
+            dotnet tool install --global dotnet-sonarscanner
+            export PATH="$PATH:/root/.dotnet/tools"
             dotnet sonarscanner begin /k:"$(sonarProjectKey)" /o:"$(sonarOrganization)"
             dotnet build src/DevOpsService/DevOpsService.csproj -c $(buildConfiguration)
             dotnet sonarscanner end
