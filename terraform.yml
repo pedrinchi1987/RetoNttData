@@ -54,7 +54,6 @@ stages:
   jobs:
     - deployment: DeployToStaging
       displayName: 'Terraform apply -> Staging'
-      environment: 'staging'
       pool:
         vmImage: 'ubuntu-latest'
       strategy:
