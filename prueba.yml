@@ -36,7 +36,7 @@ variables:
   buildConfiguration: 'Release'
   dotnetSdk: '8.0.x'
   # Use Build.BuildId if no imageTag provided
-  imageTag: $[coalesce(parameters.imageTag, variables['Build.BuildId'])]
+  imageTag: $(Build.BuildId)
   # Service connections and secrets (must create these in Azure DevOps project)
   awsEcrServiceConnection: 'AWS_ECR_SERVICE_CONNECTION'   # Docker@2 uses this
   awsCredentialsEnvVar: 'AWS'                            # We will pass AWS_ACCESS_KEY_ID & AWS_SECRET_ACCESS_KEY
