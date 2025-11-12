@@ -20,3 +20,7 @@ variable "desired_count" {
   type    = number
   default = 2
 }
+
+variable "env" {
+  type    = string
+}
