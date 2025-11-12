@@ -53,11 +53,15 @@ stages:
         vmImage: 'ubuntu-latest'
       steps:
         - checkout: self
-        # Paso 1: Instalar Terraform
-        - task: TerraformToolInstaller@1
-          displayName: 'Install Terraform'
-          inputs:
-            terraformVersion: 'latest' # O la versión específica que necesites
+
+        # 1. Instalar Terraform (Solución Manual)
+        - script: |
+            TERRAFORM_VERSION="1.7.0"
+            wget https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip
+            unzip terraform_${TERRAFORM_VERSION}_linux_amd64.zip
+            sudo mv terraform /usr/local/bin/
+            terraform version
+          displayName: 'Install Terraform Manually'
 
         - script: |
             mkdir -p ~/.terraform.d
