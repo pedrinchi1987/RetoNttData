@@ -11,7 +11,7 @@ public class JwtService
 
     public JwtService(IConfiguration config)
     {
-        _secret = Environment.GetEnvironmentVariable("JWT_SECRET") ?? config["JWT_SECRET"] ?? "dev-secret-change-me";
+        _secret = Environment.GetEnvironmentVariable("JWT_SECRET") ?? config["JWT_SECRET"] ?? "dev-secret-change-me-32bytes-long-key!!";
     }
 
     public bool ValidateToken(string token, out string jti, out string? subject)
