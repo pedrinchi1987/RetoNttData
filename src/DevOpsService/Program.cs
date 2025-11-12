@@ -28,3 +28,5 @@ app.MapGet("/", () => Results.Ok(new
 }));
 
 app.Run();
+ 
+public partial class Program {}

@@ -1,4 +1,6 @@
+using System;
 using System.Net;
+using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 using Xunit;
@@ -21,8 +23,8 @@ public class DevOpsControllerTests : IClassFixture<WebApplicationFactory<Program
     {
         var client = _factory.CreateClient();
 
-        var jwt = DevOpsService.Services.JwtService.CreateJwt(
-            secret: Environment.GetEnvironmentVariable("JWT_SECRET") ?? "dev-secret-change-me",
+        var jwt = DevOpsService.JwtService.CreateJwt(
+            secret: Environment.GetEnvironmentVariable("JWT_SECRET") ?? "dev-secret-change-me-32bytes-long-key!!",
             subject: "test-subject",
             ttlSeconds: 60);
 
