@@ -1,0 +1,79 @@
+# azure-pipelines.yml
+# Pipeline multi-stage para Azure DevOps (Build, Test, Static Analysis, Push Image, Deploy Staging, Deploy Prod)
+# Soporta: automatic triggers, manual, tag-based versioned deployments, SonarCloud, Terraform for AWS, Docker -> ECR.
+
+name: Proceso de Despliegue Continua
+
+trigger:
+  branches:
+    include:
+      - develop
+      - feature/*
+      - release/*
+      - master
+
+pr:
+  branches:
+    include:
+      - develop
+      - master
+
+# Permite ejecución manual con variables (Run pipeline -> Run with parameters)
+parameters:
+  - name: imageTag
+    displayName: 'Image tag (leave empty to use Build.BuildId)'
+    type: string
+    default: ''
+  - name: deployTo
+    displayName: 'Deploy target (none | staging | production)'
+    type: string
+    default: 'none'
+
+variables:
+  # Defaults - override in pipeline library or at run-time
+  awsRegion: 'us-east-1'
+  ecrRepository: 'devops-service'
+  serviceName: 'devops-service'
+  terraformWorkingDir: 'infra/terraform'
+  buildConfiguration: 'Release'
+  dotnetSdk: '8.0.x'
+  # Use Build.BuildId if no imageTag provided
+  imageTag: $(Build.BuildId) 
+  # Service connections and secrets (must create these in Azure DevOps project)
+  awsEcrServiceConnection: 'AWS_ECR_SERVICE_CONNECTION'   # Docker@2 uses this
+  awsCredentialsEnvVar: 'AWS'                            # We will pass AWS_ACCESS_KEY_ID & AWS_SECRET_ACCESS_KEY
+  sonarCloudServiceConnection: 'SonarOnline'
+  sonarOrganization: 'pmontenegro'                    # change
+  sonarProjectKey: 'pmontenegro_devops-service'
+
+stages:
+
+#########################
+# 4) Build & Push Image #
+#########################
+- stage: PublishImage
+  displayName: 'Build & Push Docker Image'
+  dependsOn: Analyze
+  jobs:
+    - job: DockerBuildPush
+      displayName: 'Docker Build and Push to ECR'
+      pool:
+        vmImage: 'ubuntu-latest'
+      steps:
+        - task: Docker@2
+          displayName: 'Build and Push to ECR'
+          inputs:
+            command: buildAndPush
+            repository: $(ecrRepository)
+            dockerfile: src/DevOpsService/Dockerfile
+            containerRegistry: $(awsEcrServiceConnection)
+            tags: |
+              $(imageTag)
+              latest
+        - task: PublishPipelineArtifact@1
+          displayName: 'Publish image metadata'
+          inputs:
+            targetPath: |
+              $(System.DefaultWorkingDirectory)
+            artifact: 'image-info'
+
