@@ -128,6 +128,8 @@ stages:
             scannerMode: 'MSBuild'
             projectKey: $(sonarProjectKey)
             projectName: $(sonarProjectKey)
+            extraProperties: |
+              sonar.branch.name=master
 
         - script: |
             dotnet tool install --global dotnet-sonarscanner
