@@ -30,20 +30,14 @@ parameters:
 variables:
   # Defaults - override in pipeline library or at run-time
   awsRegion: 'us-east-1'
-  ecrRepository: 'devops-service'
-  serviceName: 'devops-service'
   terraformWorkingDir: 'infra/terraform'
-  buildConfiguration: 'Release'
-  dotnetSdk: '8.0.x'
-  # Use Build.BuildId if no imageTag provided
+    # Use Build.BuildId if no imageTag provided
   imageTag: $(Build.BuildId) 
   # Service connections and secrets (must create these in Azure DevOps project)
   awsEcrServiceConnection: 'AWS_ECR_SERVICE_CONNECTION'   # Docker@2 uses this
   awsCredentialsEnvVar: 'Amazon_Pedrinchi'                            # We will pass AWS_ACCESS_KEY_ID & AWS_SECRET_ACCESS_KEY
-  sonarCloudServiceConnection: 'SonarOnline'
-  sonarOrganization: 'pmontenegro'                    # change
-  sonarProjectKey: 'devops-service'
-
+  BRANCH_NAME: $(Build.SourceBranch)
+  
 stages:
 
 #########################
@@ -61,18 +55,28 @@ stages:
           deploy:
             steps:
               - checkout: self
+
               - script: |
-                  echo "Preparing Terraform for staging..."
+                  mkdir -p ~/.terraform.d
+                  echo '{
+                    "credentials": {
+                      "app.terraform.io": {
+                        "token": "'$(TF_API_TOKEN)'"
+                      }
+                    }
+                  }' > ~/.terraform.d/credentials.tfrc.json
+
+              - script: |
                   cd $(terraformWorkingDir)
                   terraform init -input=false
-                  terraform workspace select staging || terraform workspace new staging
-                  terraform plan -var="aws_region=$(awsRegion)" -var="service_name=$(serviceName)" -var="desired_count=2" -out=tfplan-staging
+                  terraform plan -var="env=$(BRANCH_NAME)" -var="aws_region=$(awsRegion)" -var="service_name=$(serviceName)" -var="desired_count=2" -out=tfplan-staging
                   terraform apply -auto-approve tfplan-staging
                 displayName: 'Terraform init/plan/apply (staging)'
                 env:
                   AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
                   AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
                   AWS_DEFAULT_REGION: $(awsRegion)
+                  
               - script: |
                   echo "Staging deployed. Outputs:"
                   cd $(terraformWorkingDir)
