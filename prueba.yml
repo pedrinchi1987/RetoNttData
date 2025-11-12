@@ -121,13 +121,14 @@ stages:
       pool:
         vmImage: 'ubuntu-latest'
       steps:
-        - task: SonarCloudPrepare@1
+        - task: SonarCloudPrepare@3
           inputs:
             SonarCloud: $(sonarCloudServiceConnection)
             organization: $(sonarOrganization)
             scannerMode: 'MSBuild'
             projectKey: $(sonarProjectKey)
             projectName: $(sonarProjectKey)
+
         - script: |
             dotnet tool install --global dotnet-sonarscanner
             export PATH="$PATH:/root/.dotnet/tools"
@@ -137,8 +138,8 @@ stages:
             #dotnet sonarscanner end
           displayName: 'Run Sonar scanner'
         
-        - task: SonarCloudAnalyze@1
+        - task: SonarCloudAnalyze@3
         
-        - task: SonarCloudPublish@1
+        - task: SonarCloudPublish@3
           inputs:
             pollingTimeoutSec: '300'
