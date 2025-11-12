@@ -77,8 +77,10 @@ stages:
 
         - script: |
             cd $(terraformWorkingDir)
+            echo "$(AWS_ACCESS_KEY_ID) - $(AWS_SECRET_ACCESS_KEY) - $(awsRegion)"
+            echo "$(AWS_ACCESS_KEY_ID) - $(AWS_SECRET_ACCESS_KEY) - $(AWS_DEFAULT_REGION)"
             terraform init -input=false
-            terraform plan -var="env=$(BRANCH_NAME)" -var="aws_access_key='$(AWS_ACCESS_KEY_ID)'" -var="aws_secret_key='$(AWS_SECRET_ACCESS_KEY)'" -var="aws_region=$(awsRegion)" -var="service_name=$(serviceName)" -var="desired_count=2" -out=tfplan-staging
+            terraform plan -var="env=$(BRANCH_NAME)" -var="aws_access_key=$(AWS_ACCESS_KEY_ID)" -var="aws_secret_key=$(AWS_SECRET_ACCESS_KEY)" -var="aws_region=$(AWS_DEFAULT_REGION)" -var="service_name=$(serviceName)" -var="desired_count=2" -out=tfplan-staging
             terraform apply -auto-approve tfplan-staging
           displayName: 'Terraform init/plan/apply (staging)'
           env:
