@@ -77,7 +77,6 @@ stages:
 
         - script: |
             cd $(terraformWorkingDir)
-            printenv
             terraform init -input=false
             terraform plan -var="env=$(BRANCH_NAME)" -var="aws_access_key=$(AWS_ACCESS_KEY_ID)" -var="aws_secret_key=$(AWS_SECRET_ACCESS_KEY)" -var="aws_region=$(awsRegion)" -var="service_name=$(serviceName)" -var="desired_count=2" -out=tfplan-staging
             terraform apply -auto-approve tfplan-staging

@@ -1,4 +1,3 @@
-/*
 resource "aws_lb" "devops_alb" {
   name               = "${var.service_name}-alb"
   internal           = false
@@ -34,4 +33,3 @@ resource "aws_lb_listener" "devops_listener" {
     target_group_arn = aws_lb_target_group.devops_tg.arn
   }
 }
-*/
