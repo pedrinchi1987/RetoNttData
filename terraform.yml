@@ -46,39 +46,36 @@ stages:
 - stage: Deploy_Staging
   displayName: 'Deploy to Staging'
   jobs:
-    - deployment: DeployToStaging
+    - job: DeployToStaging
       displayName: 'Terraform apply -> Staging'
       pool:
         vmImage: 'ubuntu-latest'
-      strategy:
-        runOnce:
-          deploy:
-            steps:
-              - checkout: self
+      steps:
+        - checkout: self
 
-              - script: |
-                  mkdir -p ~/.terraform.d
-                  echo '{
-                    "credentials": {
-                      "app.terraform.io": {
-                        "token": "'$(TF_API_TOKEN)'"
-                      }
-                    }
-                  }' > ~/.terraform.d/credentials.tfrc.json
+        - script: |
+            mkdir -p ~/.terraform.d
+            echo '{
+              "credentials": {
+                "app.terraform.io": {
+                  "token": "'$(TF_API_TOKEN)'"
+                }
+              }
+            }' > ~/.terraform.d/credentials.tfrc.json
 
-              - script: |
-                  cd $(terraformWorkingDir)
-                  terraform init -input=false
-                  terraform plan -var="env=$(BRANCH_NAME)" -var="aws_region=$(awsRegion)" -var="service_name=$(serviceName)" -var="desired_count=2" -out=tfplan-staging
-                  terraform apply -auto-approve tfplan-staging
-                displayName: 'Terraform init/plan/apply (staging)'
-                env:
-                  AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
-                  AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
-                  AWS_DEFAULT_REGION: $(awsRegion)
-                  
-              - script: |
-                  echo "Staging deployed. Outputs:"
-                  cd $(terraformWorkingDir)
-                  terraform output -json
-                displayName: 'Terraform outputs'
+        - script: |
+            cd $(terraformWorkingDir)
+            terraform init -input=false
+            terraform plan -var="env=$(BRANCH_NAME)" -var="aws_region=$(awsRegion)" -var="service_name=$(serviceName)" -var="desired_count=2" -out=tfplan-staging
+            terraform apply -auto-approve tfplan-staging
+          displayName: 'Terraform init/plan/apply (staging)'
+          env:
+            AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
+            AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
+            AWS_DEFAULT_REGION: $(awsRegion)
+
+        - script: |
+            echo "Staging deployed. Outputs:"
+            cd $(terraformWorkingDir)
+            terraform output -json
+          displayName: 'Terraform outputs'
