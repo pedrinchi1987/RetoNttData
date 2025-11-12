@@ -2,6 +2,8 @@
 # Pipeline multi-stage para Azure DevOps (Build, Test, Static Analysis, Push Image, Deploy Staging, Deploy Prod)
 # Soporta: automatic triggers, manual, tag-based versioned deployments, SonarCloud, Terraform for AWS, Docker -> ECR.
 
+name: Proceso de Integracion Continua
+
 trigger:
   branches:
     include:
