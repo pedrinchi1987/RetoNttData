@@ -11,8 +11,11 @@ terraform {
     }
   }
 
-  cloud {
+  backend "remote" {
+    hostname = "app.terraform.io"
+
     organization = "Pmontenegro"
+
     workspaces {
       name = "RetoNttData"
     }

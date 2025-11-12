@@ -22,5 +22,5 @@ variable "desired_count" {
 }
 
 variable "env" {
-  type    = string
+  type = string
 }
