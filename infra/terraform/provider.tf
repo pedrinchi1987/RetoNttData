@@ -14,7 +14,7 @@ terraform {
   cloud {
     organization = "Pmontenegro"
     workspaces {
-      name = "RetoNttData-${var.env}"
+      name = "RetoNttData"
     }
   }
 }
