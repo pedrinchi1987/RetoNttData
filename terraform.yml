@@ -37,6 +37,7 @@ variables:
   awsEcrServiceConnection: 'AWS_ECR_SERVICE_CONNECTION'   # Docker@2 uses this
   awsCredentialsEnvVar: 'Amazon_Pedrinchi'                            # We will pass AWS_ACCESS_KEY_ID & AWS_SECRET_ACCESS_KEY
   BRANCH_NAME: $(Build.SourceBranch)
+  serviceName: 'devops-service'
   
 stages:
 
@@ -52,6 +53,11 @@ stages:
         vmImage: 'ubuntu-latest'
       steps:
         - checkout: self
+        # Paso 1: Instalar Terraform
+        - task: TerraformToolInstaller@1
+          displayName: 'Install Terraform'
+          inputs:
+            terraformVersion: 'latest' # O la versión específica que necesites
 
         - script: |
             mkdir -p ~/.terraform.d
