@@ -138,12 +138,14 @@ stages:
             projectName: $(sonarProjectKey)
             extraProperties: |
               sonar.branch.name=master
+              sonar.cs.opencover.reportsPaths=$(System.DefaultWorkingDirectory)/*/TestResults/test-results.trx
+
 
         - script: |
             dotnet tool install --global dotnet-sonarscanner
             export PATH="$PATH:/root/.dotnet/tools"
             dotnet build src/DevOpsService/DevOpsService.csproj -c $(buildConfiguration)
-            dotnet test tests/DevOpsService.Tests/DevOpsService.Tests.csproj --configuration $(buildConfiguration) --logger "trx;LogFileName=test-results.trx"
+            dotnet test tests/DevOpsService.Tests/DevOpsService.Tests.csproj --configuration $(buildConfiguration) --logger "trx;LogFileName=test-results.trx" /p:CollectCoverage=true /p:CoverletOutput=$(Build.SourcesDirectory)/coverage.cobertura.xml /p:CoverletOutputFormat=cobertura
           displayName: 'Run Sonar scanner'
         
         - task: SonarCloudAnalyze@2
