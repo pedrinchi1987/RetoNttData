@@ -125,7 +125,7 @@ stages:
           inputs:
             SonarCloud: $(sonarCloudServiceConnection)
             organization: $(sonarOrganization)
-            scannerMode: 'MSBuild'
+            scannerMode: 'dotnet'
             projectKey: $(sonarProjectKey)
             projectName: $(sonarProjectKey)
 
