@@ -45,6 +45,7 @@ public class DevOpsControllerTests : IClassFixture<WebApplicationFactory<Program
         var body = await response.Content.ReadAsStringAsync();
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        
         Assert.Contains("Hello Juan Perez your message will be sent", body);
     }
 }
