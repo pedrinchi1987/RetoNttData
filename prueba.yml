@@ -92,7 +92,13 @@ stages:
             version: $(dotnetSdk)
 
         - script: |
-            dotnet test tests/DevOpsService.Tests/DevOpsService.Tests.csproj --configuration $(buildConfiguration) --logger "trx;LogFileName=test-results.trx" --no-build
+            dotnet --info
+            dotnet tool restore || true
+            dotnet restore tests/DevOpsService.Tests/DevOpsService.Tests.csproj
+          displayName: 'dotnet restore'
+
+        - script: |
+            dotnet test tests/DevOpsService.Tests/DevOpsService.Tests.csproj --configuration $(buildConfiguration) --logger "trx;LogFileName=test-results.trx" --no-build /p:CollectCoverage=true /p:CoverletOutput=$(Build.SourcesDirectory)/coverage.cobertura.xml /p:CoverletOutputFormat=cobertura --results-directory ./src/TestResults
           displayName: 'dotnet test'
 
         - task: PublishTestResults@2
@@ -134,10 +140,8 @@ stages:
         - script: |
             dotnet tool install --global dotnet-sonarscanner
             export PATH="$PATH:/root/.dotnet/tools"
-            #dotnet sonarscanner begin /k:"$(sonarProjectKey)" /o:"$(sonarOrganization)" /d:sonar.branch.name="master"
             dotnet build src/DevOpsService/DevOpsService.csproj -c $(buildConfiguration)
             dotnet test tests/DevOpsService.Tests/DevOpsService.Tests.csproj --configuration $(buildConfiguration) --logger "trx;LogFileName=test-results.trx" --no-build
-            #dotnet sonarscanner end
           displayName: 'Run Sonar scanner'
         
         - task: SonarCloudAnalyze@2
