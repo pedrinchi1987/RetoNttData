@@ -40,7 +40,7 @@ variables:
   # Use Build.BuildId if no imageTag provided
   imageTag: $(Build.BuildId) 
   # Service connections and secrets (must create these in Azure DevOps project)
-  awsEcrServiceConnection: '375825163039.dkr.ecr.us-east-1.amazonaws.com/devops-service'   # Docker@2 uses this
+  awsEcrServiceConnection: 'devops-service'   # Docker@2 uses this
   awsCredentialsEnvVar: 'AWS'                            # We will pass AWS_ACCESS_KEY_ID & AWS_SECRET_ACCESS_KEY
   sonarCloudServiceConnection: 'SonarOnline'
   sonarOrganization: 'pmontenegro'                    # change
