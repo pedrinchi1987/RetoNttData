@@ -63,14 +63,14 @@ stages:
       steps:
         - checkout: self
 
-        - script: |
-            echo "🔐 Logging in to Amazon ECR..."
-            aws --version
-            aws ecr get-login-password --region $(awsRegion) | docker login --username AWS --password-stdin $(awsAccountId).dkr.ecr.$(awsRegion).amazonaws.com
-          env:
-            AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
-            AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
-          displayName: '🔑 Login manual to ECR'
+        - task: AWSCLI@1
+          displayName: '🔐 Login to Amazon ECR'
+          inputs:
+            awsCredentials: 'Amazon_Pedrinchi'
+            regionName: 'us-east-1'
+            arguments: |
+              ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin $(awsAccountId).dkr.ecr.$(awsRegion).amazonaws.com
+
 
         - script: |
             echo "🐳 Building Docker image..."
