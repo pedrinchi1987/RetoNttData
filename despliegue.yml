@@ -68,8 +68,8 @@ stages:
             aws --version
             aws ecr get-login-password --region $(awsRegion) | docker login --username AWS --password-stdin $(awsAccountId).dkr.ecr.$(awsRegion).amazonaws.com
           env:
-            AWS_ACCESS_KEY_ID: $(awsAccessKeyId)
-            AWS_SECRET_ACCESS_KEY: $(awsSecretAccessKey)
+            AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
+            AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
           displayName: '🔑 Login manual to ECR'
 
         - script: |
@@ -81,8 +81,8 @@ stages:
             docker push $(awsAccountId).dkr.ecr.$(awsRegion).amazonaws.com/$(ecrRepository):$(Build.BuildId)
             docker push $(awsAccountId).dkr.ecr.$(awsRegion).amazonaws.com/$(ecrRepository):latest
           env:
-            AWS_ACCESS_KEY_ID: $(awsAccessKeyId)
-            AWS_SECRET_ACCESS_KEY: $(awsSecretAccessKey)
+            AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
+            AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
           displayName: '🐳 Build & Push Docker image'
 
         - task: PublishPipelineArtifact@1
