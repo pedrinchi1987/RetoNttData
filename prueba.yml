@@ -43,7 +43,7 @@ variables:
   awsEcrServiceConnection: 'AWS_ECR_SERVICE_CONNECTION'   # Docker@2 uses this
   awsCredentialsEnvVar: 'AWS'                            # We will pass AWS_ACCESS_KEY_ID & AWS_SECRET_ACCESS_KEY
   sonarCloudServiceConnection: 'SonarOnline'
-  sonarOrganization: 'pmontenegro'                    # change
+  sonarOrganization: 'pedrinchi1987'                    # change
   sonarProjectKey: 'pmontenegro_devops-service'
 
 stages:
