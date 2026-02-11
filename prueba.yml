@@ -153,4 +153,3 @@ stages:
         - task: SonarCloudPublish@2
           inputs:
             pollingTimeoutSec: '300'
-
