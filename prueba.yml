@@ -44,7 +44,7 @@ variables:
   awsCredentialsEnvVar: 'AWS'                            # We will pass AWS_ACCESS_KEY_ID & AWS_SECRET_ACCESS_KEY
   sonarCloudServiceConnection: 'SonarOnline'
   sonarOrganization: 'pedrinchi1987'                    # change
-  sonarProjectKey: 'pedrinchi1987_RetoNttData' #'pmontenegro_devops-service'
+  sonarProjectKey: 'pedrinchi1987_RetoNttData'  # 'pmontenegro_devops-service'
 
 stages:
 
