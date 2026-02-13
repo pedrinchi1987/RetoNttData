@@ -32,7 +32,7 @@ parameters:
 variables:
   # Defaults - override in pipeline library or at run-time
   awsRegion: 'us-east-1'
-  awsAccountId: 375825163039
+  awsAccountId: 340752837689
   ecrRepository: 'devops-service'
   serviceName: 'devops-service'
   terraformWorkingDir: 'infra/terraform'
