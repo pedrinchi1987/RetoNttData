@@ -3,8 +3,8 @@ WORKDIR /app
 EXPOSE 80
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-WORKDIR /src/DevOpsService
 COPY . .
+WORKDIR /src/DevOpsService
 RUN dotnet restore "DevOpsService.csproj"
 RUN dotnet publish "DevOpsService.csproj" -c Release -o /app/publish
 
