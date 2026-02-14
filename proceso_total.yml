@@ -60,22 +60,6 @@ variables:
 
 stages:
 
-- stage: Temporal_validar_valores
-  displayName: 'Temporal_validar_valores'
-  jobs:
-    - job: Temporal_validar_valores
-      displayName: 'Temporal_validar_valores'
-      pool:
-        vmImage: 'ubuntu-latest'
-      steps:
-        - checkout: self
-
-        # 1. Instalar Terraform (Solución Manual)
-        - script: |
-            echo "environmentName=$(environmentName)"
-            exit 1
-          displayName: 'Temporal_validar_valores'
-
 #########################
 # 1) Build & Restore    #
 #########################
@@ -92,6 +76,13 @@ stages:
           inputs:
             packageType: 'sdk'
             version: $(dotnetSdk)
+            
+        - script: |
+            cat $(terraformWorkingDir)/requisito/provider.tf
+            sed -i "s/{AMBIENTE}/$(environmentName)/g" "$(terraformWorkingDir)/requisito/provider.tf"
+            cat $(terraformWorkingDir)/requisito/provider.tf
+            exit 1
+          displayName: 'Adaptar Nombre Estado Remoto'
 
         - script: |
             dotnet --info
@@ -181,3 +172,56 @@ stages:
         - task: SonarCloudPublish@2
           inputs:
             pollingTimeoutSec: '300'
+
+            
+######################################
+# 4) Deploy to Staging PreRequisitos #
+######################################
+- stage: Deploy_Prerequisitos
+  displayName: 'Deploy to Prerequisitos'
+  jobs:
+    - job: DeployToPrerequisitos
+      displayName: 'Terraform apply -> Prerequisitos'
+      pool:
+        vmImage: 'ubuntu-latest'
+      steps:
+        - checkout: self
+
+        # 1. Instalar Terraform (Solución Manual)
+        - script: |
+            TERRAFORM_VERSION="1.7.0"
+            wget https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip
+            unzip terraform_${TERRAFORM_VERSION}_linux_amd64.zip
+            sudo mv terraform /usr/local/bin/
+            terraform version
+          displayName: 'Install Terraform Manually'
+
+          
+        # 1. Instalar Terraform (Solución Manual)
+        - script: |
+            sed -i "s/{AMBIENTE}/$(environmentName)/g" "$(terraformWorkingDir)/requisito/provider.tf"
+          displayName: 'Adaptar Nombre Estado Remoto'
+
+        - script: |
+            mkdir -p ~/.terraform.d
+            echo '{
+              "credentials": {
+                "app.terraform.io": {
+                  "token": "'$(TF_API_TOKEN)'"
+                }
+              }
+            }' > ~/.terraform.d/credentials.tfrc.json
+          displayName: 'Credenciales Terraform Cloud'
+                    
+        - script: |
+            cd $(terraformWorkingDir)/requisito
+            terraform init -input=false
+            terraform plan -var="env=$(BRANCH_NAME)" -var="aws_access_key=$(AWS_ACCESS_KEY_ID)" -var="aws_secret_key=$(AWS_SECRET_ACCESS_KEY)" -var="aws_region=$(awsRegion)" -var="service_name=$(serviceName)" -var="desired_count=2" -out=tfplan-staging
+            terraform apply -auto-approve tfplan-staging
+          displayName: 'Terraform init/plan/apply (staging)'
+
+        - script: |
+            echo "Staging deployed. Outputs:"
+            cd $(terraformWorkingDir)
+            terraform output -json
+          displayName: 'Terraform outputs'
