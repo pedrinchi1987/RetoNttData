@@ -33,7 +33,6 @@ variables:
   # Defaults - override in pipeline library or at run-time
   awsRegion: 'us-east-1'
   awsAccountId: 340752837689
-  ecrRepository: 'devops-service'
   serviceName: 'devops-service'
   terraformWorkingDir: 'infra/terraform'
   buildConfiguration: 'Release'
@@ -57,7 +56,7 @@ variables:
     environmentName: 'dev'
   ${{ else }}:
     environmentName: 'dev'
-  awsEcrServiceConnection: '$(serviceName)-$(environmentName)'   # Docker@2 uses this
+  ecrRepository: '$(serviceName)-$(environmentName)'   # Docker@2 uses this
 
 stages:
 
