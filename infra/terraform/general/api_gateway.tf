@@ -1,5 +1,5 @@
 resource "aws_api_gateway_rest_api" "devops_api" {
-  name        = "${var.service_name}-api"
+  name        = "${var.service_name}-${var.env}-api"
   description = "API Gateway for DevOps Microservice"
 }
 

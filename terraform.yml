@@ -5,18 +5,7 @@
 name: Ejecucion IAC Terraform
 
 trigger:
-  branches:
-    include:
-      - develop
-      - feature/*
-      - release/*
-      - master
-
-pr:
-  branches:
-    include:
-      - develop
-      - master
+  none
 
 # Permite ejecución manual con variables (Run pipeline -> Run with parameters)
 parameters:

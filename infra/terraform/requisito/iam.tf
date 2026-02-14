@@ -1,7 +1,7 @@
 data "aws_caller_identity" "current" {}
 
 resource "aws_iam_role" "ecs_task_execution_role" {
-  name = "ecsTaskExecutionRole"
+  name = "ecsTaskExecutionRole-${var.env}"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -23,7 +23,7 @@ resource "aws_iam_role_policy_attachment" "ecs_task_execution_policy" {
 }
 
 resource "aws_iam_policy" "ecs_extra_permissions" {
-  name        = "ecs-extra-permissions"
+  name        = "ecs-${var.env}-extra-permissions"
   description = "Permite acceso ECR y CloudWatch logs"
 
   policy = jsonencode({
@@ -60,7 +60,7 @@ resource "aws_iam_role_policy_attachment" "ecs_extra_attach" {
 }
 
 resource "aws_iam_role" "lambda_exec_role" {
-  name = "lambdaAuthorizerExecRole"
+  name = "lambdaAuthorizerExecRole-${var.env}"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -77,7 +77,7 @@ resource "aws_iam_role" "lambda_exec_role" {
 }
 
 resource "aws_iam_policy" "lambda_logs_policy" {
-  name        = "lambda-logs-policy"
+  name        = "lambda-${var.env}-logs-policy"
   description = "Permite que Lambda escriba en CloudWatch Logs"
 
   policy = jsonencode({
@@ -102,7 +102,7 @@ resource "aws_iam_role_policy_attachment" "lambda_logs_attach" {
 }
 
 resource "aws_iam_role" "terraform_deploy_role" {
-  name = "terraformDeployRole"
+  name = "terraformDeployRole-${var.env}"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -119,7 +119,7 @@ resource "aws_iam_role" "terraform_deploy_role" {
 }
 
 resource "aws_iam_policy" "terraform_deploy_policy" {
-  name        = "terraform-deploy-policy"
+  name        = "terraform-deploy-policy-${var.env}"
   description = "Permite a Terraform crear infraestructura del microservicio DevOps"
 
   policy = jsonencode({

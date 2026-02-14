@@ -41,7 +41,7 @@ resource "aws_cloudwatch_log_group" "ecs_logs" {
 }
 
 resource "aws_ecs_service" "devops_service" {
-  name            = var.service_name
+  name            = "${var.service_name}-${var.env}"
   cluster         = aws_ecs_cluster.devops_cluster.id
   task_definition = aws_ecs_task_definition.devops_task.arn
   desired_count   = var.desired_count
@@ -53,7 +53,7 @@ resource "aws_ecs_service" "devops_service" {
   }
   load_balancer {
     target_group_arn = aws_lb_target_group.devops_tg.arn
-    container_name   = var.service_name
+    container_name   = "${var.service_name}-${var.env}"
     container_port   = 80
   }
   depends_on = [

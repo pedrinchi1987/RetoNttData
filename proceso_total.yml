@@ -5,7 +5,18 @@
 name: Proceso de Integracion Continua
 
 trigger:
-  none
+  branches:
+    include:
+      - develop
+      - feature/*
+      - release/*
+      - master
+
+pr:
+  branches:
+    include:
+      - develop
+      - master
 
 # Permite ejecución manual con variables (Run pipeline -> Run with parameters)
 parameters:
@@ -34,8 +45,32 @@ variables:
   sonarCloudServiceConnection: 'SonarOnline'
   sonarOrganization: 'pedrinchi1987'                    # change
   sonarProjectKey: 'pedrinchi1987_RetoNttData'  # 'pmontenegro_devops-service'
+  # Variable dependiente de la branch
+  environmentName: $[
+    if(startsWith(variables['Build.SourceBranch'], 'refs/heads/master')) then 'prod'
+    else if(startsWith(variables['Build.SourceBranch'], 'refs/heads/release/')) then 'qa'
+    else if(startsWith(variables['Build.SourceBranch'], 'refs/heads/develop')) then 'dev'
+    else if(startsWith(variables['Build.SourceBranch'], 'refs/heads/feature/')) then 'dev'
+    else 'dev'
+  ]
 
 stages:
+
+- stage: Temporal_validar_valores
+  displayName: 'Temporal_validar_valores'
+  jobs:
+    - job: Temporal_validar_valores
+      displayName: 'Temporal_validar_valores'
+      pool:
+        vmImage: 'ubuntu-latest'
+      steps:
+        - checkout: self
+
+        # 1. Instalar Terraform (Solución Manual)
+        - script: |
+            echo "environmentName=$(environmentName)"
+            exit 1
+          displayName: 'Temporal_validar_valores'
 
 #########################
 # 1) Build & Restore    #

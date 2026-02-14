@@ -2,7 +2,7 @@ module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "5.5.0"
 
-  name = "devops-vpc"
+  name = "devops-vpc-${var.env}"
   cidr = "10.0.0.0/16"
 
   azs                = [format("%sa", var.aws_region), format("%sb", var.aws_region)]

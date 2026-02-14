@@ -6,7 +6,7 @@ data "archive_file" "lambda_zip" {
 
 resource "aws_lambda_function" "jwt_authorizer" {
   filename         = data.archive_file.lambda_zip.output_path
-  function_name    = "${var.service_name}-jwt-authorizer"
+  function_name    = "${var.service_name}-${var.env}-jwt-authorizer"
   role             = aws_iam_role.lambda_exec_role.arn
   handler          = "index.handler"
   runtime          = "nodejs20.x"
