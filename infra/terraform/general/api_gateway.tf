@@ -26,7 +26,7 @@ resource "aws_api_gateway_integration" "devops_integration" {
   http_method             = aws_api_gateway_method.devops_post.http_method
   type                    = "HTTP"
   integration_http_method = "POST"
-  uri                     = "http://${aws_lb.devops_alb.dns_name}/DevOps"
+  uri                     = "http://${data.aws_lb.devops_alb.dns_name}/DevOps"
   connection_type         = "INTERNET"
 }
 
