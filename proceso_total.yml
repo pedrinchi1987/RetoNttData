@@ -45,12 +45,13 @@ variables:
   sonarCloudServiceConnection: 'SonarOnline'
   sonarOrganization: 'pedrinchi1987'                    # change
   sonarProjectKey: 'pedrinchi1987_RetoNttData'  # 'pmontenegro_devops-service'
+  BRANCH_NAME: $(Build.SourceBranch)
   # Variable dependiente de la branch
   environmentName: $[
-    if(startsWith(variables['Build.SourceBranch'], 'refs/heads/master')) then 'prod'
-    else if(startsWith(variables['Build.SourceBranch'], 'refs/heads/release/')) then 'qa'
-    else if(startsWith(variables['Build.SourceBranch'], 'refs/heads/develop')) then 'dev'
-    else if(startsWith(variables['Build.SourceBranch'], 'refs/heads/feature/')) then 'dev'
+    if(eq(variables['Build.SourceBranchName'], 'master')) then 'prod'
+    else if(startsWith(variables['Build.SourceBranchName'], 'release/')) then 'qa'
+    else if(eq(variables['Build.SourceBranchName'], 'develop')) then 'dev'
+    else if(startsWith(variables['Build.SourceBranchName'], 'feature/')) then 'dev'
     else 'dev'
   ]
 
