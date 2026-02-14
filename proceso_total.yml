@@ -142,7 +142,7 @@ stages:
       pool:
         vmImage: 'ubuntu-latest'
       steps:
-        - task: SonarCloudPrepare@2
+        - task: SonarCloudPrepare@3
           inputs:
             SonarCloud: $(sonarCloudServiceConnection)
             organization: $(sonarOrganization)
