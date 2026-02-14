@@ -295,7 +295,13 @@ stages:
               }
             }' > ~/.terraform.d/credentials.tfrc.json
           displayName: 'Credenciales Terraform Cloud'
-                    
+          
+        - script: |
+            cd $(terraformWorkingDir)/general/lambda
+            npm init -y
+            npm install jsonwebtoken
+          displayName: 'Compilar Lambda'
+                              
         - script: |
             cd $(terraformWorkingDir)/general
             terraform init
