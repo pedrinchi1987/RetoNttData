@@ -47,13 +47,16 @@ variables:
   sonarProjectKey: 'pedrinchi1987_RetoNttData'  # 'pmontenegro_devops-service'
   BRANCH_NAME: $(Build.SourceBranch)
   # Variable dependiente de la branch
-  environmentName: $[
-    if(eq($(Build.SourceBranch), 'master')) then 'prod'
-    else if(startsWith($(Build.SourceBranch), 'release/')) then 'qa'
-    else if(eq($(Build.SourceBranch), 'develop')) then 'dev'
-    else if(startsWith($(Build.SourceBranch), 'feature/')) then 'dev'
-    else 'dev'
-  ]
+  ${{ if eq(variables['Build.SourceBranchName'], 'master') }}:
+    environmentName: 'prod'
+  ${{ elseif startsWith(variables['Build.SourceBranchName'], 'release/') }}:
+    environmentName: 'qa'
+  ${{ elseif eq(variables['Build.SourceBranchName'], 'develop') }}:
+    environmentName: 'dev'
+  ${{ elseif startsWith(variables['Build.SourceBranchName'], 'feature/') }}:
+    environmentName: 'dev'
+  ${{ else }}:
+    environmentName: 'dev'
 
 stages:
 
