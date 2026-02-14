@@ -122,7 +122,7 @@ stages:
             testResultsFiles: '**/test-results.trx, **/*.trx'
             failTaskOnFailedTests: true
 
-        - task: PublishCodeCoverageResults@1
+        - task: PublishCodeCoverageResults@2
           displayName: 'Publish code coverage (if collected)'
           inputs:
             codeCoverageTool: 'Cobertura'
@@ -161,9 +161,9 @@ stages:
             dotnet test tests/DevOpsService.Tests/DevOpsService.Tests.csproj --configuration $(buildConfiguration) --logger "trx;LogFileName=test-results.trx" /p:CollectCoverage=true /p:CoverletOutput=$(Build.SourcesDirectory)/coverage.cobertura.xml /p:CoverletOutputFormat=cobertura
           displayName: 'Run Sonar scanner'
         
-        - task: SonarCloudAnalyze@2
+        - task: SonarCloudAnalyze@3
         
-        - task: SonarCloudPublish@2
+        - task: SonarCloudPublish@3
           inputs:
             pollingTimeoutSec: '300'
 
@@ -207,16 +207,10 @@ stages:
                     
         - script: |
             cd $(terraformWorkingDir)/requisito
-            terraform init -input=false
-            terraform plan -var="env=$(environmentName)" -var="aws_access_key=$(AWS_ACCESS_KEY_ID)" -var="aws_secret_key=$(AWS_SECRET_ACCESS_KEY)" -var="aws_region=$(awsRegion)" -var="service_name=$(serviceName)" -var="desired_count=2" -out=tfplan-requisito
-            terraform apply -auto-approve tfplan-requisito
+            terraform init
+            terraform plan -var="env=$(environmentName)" -var="aws_access_key=$(AWS_ACCESS_KEY_ID)" -var="aws_secret_key=$(AWS_SECRET_ACCESS_KEY)" -var="aws_region=$(awsRegion)" -var="service_name=$(serviceName)" -var="desired_count=2"
+            terraform apply -var="env=$(environmentName)" -var="aws_access_key=$(AWS_ACCESS_KEY_ID)" -var="aws_secret_key=$(AWS_SECRET_ACCESS_KEY)" -var="aws_region=$(awsRegion)" -var="service_name=$(serviceName)" -var="desired_count=2" -auto-approve
           displayName: 'Terraform init/plan/apply (requisito)'
-
-        - script: |
-            echo "Requisito deployed. Outputs:"
-            cd $(terraformWorkingDir)
-            terraform output -json
-          displayName: 'Terraform outputs'
 
 
 #########################
@@ -305,9 +299,9 @@ stages:
                     
         - script: |
             cd $(terraformWorkingDir)/general
-            terraform init -input=false
-            terraform plan -var="env=$(environmentName)" -var="aws_access_key=$(AWS_ACCESS_KEY_ID)" -var="aws_secret_key=$(AWS_SECRET_ACCESS_KEY)" -var="aws_region=$(awsRegion)" -var="service_name=$(serviceName)" -var="desired_count=2" -out=tfplan-general
-            terraform apply -auto-approve tfplan-general
+            terraform init
+            terraform plan -var="env=$(environmentName)" -var="aws_access_key=$(AWS_ACCESS_KEY_ID)" -var="aws_secret_key=$(AWS_SECRET_ACCESS_KEY)" -var="aws_region=$(awsRegion)" -var="service_name=$(serviceName)" -var="desired_count=2"
+            terraform apply  -var="env=$(environmentName)" -var="aws_access_key=$(AWS_ACCESS_KEY_ID)" -var="aws_secret_key=$(AWS_SECRET_ACCESS_KEY)" -var="aws_region=$(awsRegion)" -var="service_name=$(serviceName)" -var="desired_count=2" -auto-approve
           displayName: 'Terraform init/plan/apply (general)'
 
         - script: |
