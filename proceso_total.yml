@@ -118,7 +118,7 @@ stages:
         - task: PublishTestResults@2
           inputs:
             testResultsFormat: 'VSTest'
-            testResultsFiles: '**/test-results.trx, **/*.trx'
+            testResultsFiles: '**/*/test-results.trx, **/*.trx'
             failTaskOnFailedTests: true
 
         - task: PublishCodeCoverageResults@2
