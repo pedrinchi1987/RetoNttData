@@ -48,10 +48,10 @@ variables:
   BRANCH_NAME: $(Build.SourceBranch)
   # Variable dependiente de la branch
   environmentName: $[
-    if(eq(variables['Build.SourceBranchName'], 'master')) then 'prod'
-    else if(startsWith(variables['Build.SourceBranchName'], 'release/')) then 'qa'
-    else if(eq(variables['Build.SourceBranchName'], 'develop')) then 'dev'
-    else if(startsWith(variables['Build.SourceBranchName'], 'feature/')) then 'dev'
+    if(eq($(Build.SourceBranch), 'master')) then 'prod'
+    else if(startsWith($(Build.SourceBranch), 'release/')) then 'qa'
+    else if(eq($(Build.SourceBranch), 'develop')) then 'dev'
+    else if(startsWith($(Build.SourceBranch), 'feature/')) then 'dev'
     else 'dev'
   ]
 
