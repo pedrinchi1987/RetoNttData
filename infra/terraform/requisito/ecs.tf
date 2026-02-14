@@ -1,9 +1,9 @@
 resource "aws_ecs_cluster" "devops_cluster" {
-  name = "${var.service_name}-cluster"
+  name = "${var.service_name}-${var.env}-cluster"
 }
 
 resource "aws_ecs_task_definition" "devops_task" {
-  family                   = var.service_name
+  family                   = "${var.service_name}-${var.env}"
   requires_compatibilities = ["FARGATE"]
   network_mode             = "awsvpc"
   cpu                      = "256"
@@ -11,7 +11,7 @@ resource "aws_ecs_task_definition" "devops_task" {
   execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
   container_definitions = jsonencode([
     {
-      name  = "${var.service_name}"
+      name  = "${var.service_name}-${var.env}"
       image = "${aws_ecr_repository.devops_repo.repository_url}:latest"
       portMappings = [
         {
@@ -26,7 +26,7 @@ resource "aws_ecs_task_definition" "devops_task" {
       logConfiguration = {
         logDriver = "awslogs"
         options = {
-          awslogs-group         = "/ecs/${var.service_name}"
+          awslogs-group         = "/ecs/${var.service_name}-${var.env}"
           awslogs-region        = var.aws_region
           awslogs-stream-prefix = "ecs"
         }
@@ -36,7 +36,7 @@ resource "aws_ecs_task_definition" "devops_task" {
 }
 
 resource "aws_cloudwatch_log_group" "ecs_logs" {
-  name              = "/ecs/${var.service_name}"
+  name              = "/ecs/${var.service_name}-${var.env}"
   retention_in_days = 14
 }
 
