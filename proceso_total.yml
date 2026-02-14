@@ -18,17 +18,6 @@ pr:
       - develop
       - master
 
-# Permite ejecución manual con variables (Run pipeline -> Run with parameters)
-parameters:
-  - name: imageTag
-    displayName: 'Image tag (leave empty to use Build.BuildId)'
-    type: string
-    default: ''
-  - name: deployTo
-    displayName: 'Deploy target (none | staging | production)'
-    type: string
-    default: 'none'
-
 variables:
   # Defaults - override in pipeline library or at run-time
   awsRegion: 'us-east-1'
