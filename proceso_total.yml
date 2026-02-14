@@ -142,7 +142,7 @@ stages:
       pool:
         vmImage: 'ubuntu-latest'
       steps:
-        - task: SonarCloudPrepare@5
+        - task: SonarCloudPrepare@2
           inputs:
             SonarCloud: $(sonarCloudServiceConnection)
             organization: $(sonarOrganization)
@@ -161,9 +161,9 @@ stages:
             dotnet test tests/DevOpsService.Tests/DevOpsService.Tests.csproj --configuration $(buildConfiguration) --logger "trx;LogFileName=test-results.trx" /p:CollectCoverage=true /p:CoverletOutput=$(Build.SourcesDirectory)/coverage.cobertura.xml /p:CoverletOutputFormat=cobertura
           displayName: 'Run Sonar scanner'
         
-        - task: SonarCloudAnalyze@5
+        - task: SonarCloudAnalyze@2
         
-        - task: SonarCloudPublish@5
+        - task: SonarCloudPublish@2
           inputs:
             pollingTimeoutSec: '300'
 
