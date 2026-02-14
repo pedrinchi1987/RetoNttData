@@ -79,11 +79,6 @@ stages:
             version: $(dotnetSdk)
             
         - script: |
-            echo "awsEcrServiceConnection=$(awsEcrServiceConnection)"
-            exit 1
-          displayName: 'dotnet restore'
-            
-        - script: |
             dotnet --info
             dotnet tool restore || true
             dotnet restore src/DevOpsService/DevOpsService.csproj
@@ -195,8 +190,6 @@ stages:
             terraform version
           displayName: 'Install Terraform Manually'
 
-          
-        # 1. Instalar Terraform (Solución Manual)
         - script: |
             sed -i "s/{AMBIENTE}/$(environmentName)/g" "$(terraformWorkingDir)/requisito/provider.tf"
           displayName: 'Adaptar Nombre Estado Remoto'
@@ -215,12 +208,12 @@ stages:
         - script: |
             cd $(terraformWorkingDir)/requisito
             terraform init -input=false
-            terraform plan -var="env=$(BRANCH_NAME)" -var="aws_access_key=$(AWS_ACCESS_KEY_ID)" -var="aws_secret_key=$(AWS_SECRET_ACCESS_KEY)" -var="aws_region=$(awsRegion)" -var="service_name=$(serviceName)" -var="desired_count=2" -out=tfplan-staging
-            terraform apply -auto-approve tfplan-staging
-          displayName: 'Terraform init/plan/apply (staging)'
+            terraform plan -var="env=$(environmentName)" -var="aws_access_key=$(AWS_ACCESS_KEY_ID)" -var="aws_secret_key=$(AWS_SECRET_ACCESS_KEY)" -var="aws_region=$(awsRegion)" -var="service_name=$(serviceName)" -var="desired_count=2" -out=tfplan-requisito
+            terraform apply -auto-approve tfplan-requisito
+          displayName: 'Terraform init/plan/apply (requisito)'
 
         - script: |
-            echo "Staging deployed. Outputs:"
+            echo "Requisito deployed. Outputs:"
             cd $(terraformWorkingDir)
             terraform output -json
           displayName: 'Terraform outputs'
@@ -295,10 +288,8 @@ stages:
             terraform version
           displayName: 'Install Terraform Manually'
 
-          
-        # 1. Instalar Terraform (Solución Manual)
         - script: |
-            sed -i "s/{AMBIENTE}/$(environmentName)/g" "$(terraformWorkingDir)/General/provider.tf"
+            sed -i "s/{AMBIENTE}/$(environmentName)/g" "$(terraformWorkingDir)/general/provider.tf"
           displayName: 'Adaptar Nombre Estado Remoto'
 
         - script: |
@@ -313,14 +304,14 @@ stages:
           displayName: 'Credenciales Terraform Cloud'
                     
         - script: |
-            cd $(terraformWorkingDir)/General
+            cd $(terraformWorkingDir)/general
             terraform init -input=false
-            terraform plan -var="env=$(BRANCH_NAME)" -var="aws_access_key=$(AWS_ACCESS_KEY_ID)" -var="aws_secret_key=$(AWS_SECRET_ACCESS_KEY)" -var="aws_region=$(awsRegion)" -var="service_name=$(serviceName)" -var="desired_count=2" -out=tfplan-staging
-            terraform apply -auto-approve tfplan-staging
-          displayName: 'Terraform init/plan/apply (staging)'
+            terraform plan -var="env=$(environmentName)" -var="aws_access_key=$(AWS_ACCESS_KEY_ID)" -var="aws_secret_key=$(AWS_SECRET_ACCESS_KEY)" -var="aws_region=$(awsRegion)" -var="service_name=$(serviceName)" -var="desired_count=2" -out=tfplan-general
+            terraform apply -auto-approve tfplan-general
+          displayName: 'Terraform init/plan/apply (general)'
 
         - script: |
-            echo "Staging deployed. Outputs:"
+            echo "General deployed. Outputs:"
             cd $(terraformWorkingDir)
             terraform output -json
           displayName: 'Terraform outputs'
