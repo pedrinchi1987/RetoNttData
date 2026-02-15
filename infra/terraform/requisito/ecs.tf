@@ -68,8 +68,6 @@ resource "aws_ecs_service" "devops_service" {
     aws_ecs_task_definition.devops_task,
     aws_security_group.ecs_sg,
     aws_lb_target_group.devops_tg,
-    aws_lb_target_group.devops_tg_433,
-    aws_lb_listener.devops_listener,
-    aws_lb_listener.devops_listener_433
+    aws_lb_listener.devops_listener
   ]
 }
