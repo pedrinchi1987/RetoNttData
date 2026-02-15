@@ -19,9 +19,12 @@ public class JwtService
         jti = string.Empty;
         subject = null;
         try
-        {
+        {            
+            Console.WriteLine("----- 1 -----");
             var tokenHandler = new JwtSecurityTokenHandler();
+            Console.WriteLine("----- 2 -----");
             var key = Encoding.ASCII.GetBytes(_secret);
+            Console.WriteLine("----- 3 -----");
             tokenHandler.ValidateToken(token, new TokenValidationParameters
             {
                 ValidateIssuerSigningKey = true,
@@ -31,13 +34,18 @@ public class JwtService
                 ClockSkew = TimeSpan.FromSeconds(5)
             }, out var validatedToken);
 
+            Console.WriteLine("----- 4 -----");
             var jwtToken = (JwtSecurityToken)validatedToken;
-            jti = jwtToken.Id;
-            subject = jwtToken.Subject;
+            Console.WriteLine("----- 5 -----");
+            jti = jwtToken.Id;            
+            Console.WriteLine("----- 6 -----");
+            subject = jwtToken.Subject;            
+            Console.WriteLine("----- 7 -----");
             return true;
         }
         catch
         {
+            Console.WriteLine("----- error -----");
             return false;
         }
     }
