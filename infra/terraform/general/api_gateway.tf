@@ -31,10 +31,79 @@ resource "aws_api_gateway_integration" "devops_integration" {
 }
 
 resource "aws_api_gateway_authorizer" "devops_authorizer" {
-  name                             = "devops-authorizer"
+  name                             = "devops-authorizer-${var.env}"
   rest_api_id                      = aws_api_gateway_rest_api.devops_api.id
   authorizer_uri                   = aws_lambda_function.jwt_authorizer.invoke_arn
   authorizer_result_ttl_in_seconds = 0
   identity_source                  = "method.request.header.X-JWT-KWY"
   type                             = "REQUEST"
+}
+
+resource "aws_api_gateway_account" "api_account" {
+  cloudwatch_role_arn = aws_iam_role.apigw_cloudwatch_role.arn
+
+  depends_on = [
+    aws_iam_role.apigw_cloudwatch_role
+  ]
+}
+
+resource "aws_cloudwatch_log_group" "apigw_logs" {
+  name              = "/aws/apigateway/${var.service_name}-${var.env}"
+  retention_in_days = 14
+}
+
+resource "aws_api_gateway_deployment" "devops_deployment" {
+  rest_api_id = aws_api_gateway_rest_api.devops_api.id
+
+  depends_on = [
+    aws_api_gateway_integration.devops_integration
+  ]
+}
+
+resource "aws_api_gateway_stage" "devops_stage" {
+  stage_name    = var.env
+  rest_api_id   = aws_api_gateway_rest_api.devops_api.id
+  deployment_id = aws_api_gateway_deployment.devops_deployment.id
+
+  access_log_settings {
+    destination_arn = aws_cloudwatch_log_group.apigw_logs.arn
+
+    format = jsonencode({
+      requestId      = "$context.requestId"
+      ip             = "$context.identity.sourceIp"
+      caller         = "$context.identity.caller"
+      user           = "$context.identity.user"
+      requestTime    = "$context.requestTime"
+      httpMethod     = "$context.httpMethod"
+      resourcePath   = "$context.resourcePath"
+      status         = "$context.status"
+      protocol       = "$context.protocol"
+      responseLength = "$context.responseLength"
+    })
+  }
+
+  xray_tracing_enabled = true
+
+  depends_on = [
+    aws_api_gateway_rest_api.devops_api,
+    aws_api_gateway_deployment.devops_deployment,
+    aws_cloudwatch_log_group.apigw_logs
+  ]
+}
+
+resource "aws_api_gateway_method_settings" "all" {
+  rest_api_id = aws_api_gateway_rest_api.devops_api.id
+  stage_name  = aws_api_gateway_stage.devops_stage.stage_name
+  method_path = "*/*"
+
+  settings {
+    logging_level      = "INFO" # ERROR | INFO
+    metrics_enabled    = true
+    data_trace_enabled = true # Cuidado en prod (puede loggear payloads)
+  }
+
+  depends_on = [
+    aws_api_gateway_rest_api.devops_api,
+    aws_api_gateway_stage.devops_stage
+  ]
 }
