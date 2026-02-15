@@ -56,11 +56,13 @@ resource "aws_ecs_service" "devops_service" {
     container_name   = "${var.service_name}-${var.env}"
     container_port   = 80
   }
+  /*
   load_balancer {
     target_group_arn = aws_lb_target_group.devops_tg_433.arn
     container_name   = "${var.service_name}-${var.env}"
     container_port   = 433
   }
+  */
   depends_on = [
     aws_ecs_cluster.devops_cluster,
     aws_ecs_task_definition.devops_task,

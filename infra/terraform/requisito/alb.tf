@@ -36,7 +36,7 @@ resource "aws_lb_listener" "devops_listener" {
 
 ##########################################################
 ##########################################################
-
+/*
 resource "aws_lb_target_group" "devops_tg_433" {
   name        = "${var.service_name}-${var.env}-tg-433"
   port        = 433
@@ -64,3 +64,4 @@ resource "aws_lb_listener" "devops_listener_433" {
     target_group_arn = aws_lb_target_group.devops_tg_433.arn
   }
 }
+*/
