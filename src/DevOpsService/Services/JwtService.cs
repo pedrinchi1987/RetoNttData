@@ -20,11 +20,11 @@ public class JwtService
         subject = null;
         try
         {            
-            Console.WriteLine("----- 1 -----");
+            Console.WriteLine("----- 1 ----- token="+token);
             var tokenHandler = new JwtSecurityTokenHandler();
-            Console.WriteLine("----- 2 -----");
+            Console.WriteLine("----- 2 ----- _secret="+_secret);
             var key = Encoding.ASCII.GetBytes(_secret);
-            Console.WriteLine("----- 3 -----");
+            Console.WriteLine("----- 3 ----- key="+key);
             tokenHandler.ValidateToken(token, new TokenValidationParameters
             {
                 ValidateIssuerSigningKey = true,
@@ -45,6 +45,7 @@ public class JwtService
         }
         catch
         {
+            Console.WriteLine(CreateJwt(_secret, subject,60));
             Console.WriteLine("----- error -----");
             return false;
         }
