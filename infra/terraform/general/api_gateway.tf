@@ -39,17 +39,18 @@ resource "aws_api_gateway_authorizer" "devops_authorizer" {
   type                             = "REQUEST"
 }
 
+resource "aws_cloudwatch_log_group" "apigw_logs" {
+  name              = "/aws/apigateway/${var.service_name}-${var.env}"
+  retention_in_days = 14
+}
+
 resource "aws_api_gateway_account" "api_account" {
   cloudwatch_role_arn = aws_iam_role.apigw_cloudwatch_role.arn
 
   depends_on = [
-    aws_iam_role.apigw_cloudwatch_role
+    aws_iam_role.apigw_cloudwatch_role,    
+    aws_iam_role_policy_attachment.apigw_cloudwatch_policy
   ]
-}
-
-resource "aws_cloudwatch_log_group" "apigw_logs" {
-  name              = "/aws/apigateway/${var.service_name}-${var.env}"
-  retention_in_days = 14
 }
 
 resource "aws_api_gateway_deployment" "devops_deployment" {
@@ -85,6 +86,7 @@ resource "aws_api_gateway_stage" "devops_stage" {
   xray_tracing_enabled = true
 
   depends_on = [
+    aws_api_gateway_account.api_account
     aws_api_gateway_rest_api.devops_api,
     aws_api_gateway_deployment.devops_deployment,
     aws_cloudwatch_log_group.apigw_logs
