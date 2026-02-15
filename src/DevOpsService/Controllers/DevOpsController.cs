@@ -33,7 +33,7 @@ public class DevOpsController : ControllerBase
         Console.WriteLine("jwtId=" + jwtId);
         Console.WriteLine("subject=" + subject);
         if (!validation)
-            return Unauthorized(new { error = "Invalid JWT" });
+            return Unauthorized(new { error = "Invalid JWT - (jwt= "+jwt+" ) - (jwtId="+jwtId+") - (subject="+subject+")" });
 
         if (_cache.TryGetValue(jwtId, out _))
             return BadRequest(new { error = "JWT already used" });
