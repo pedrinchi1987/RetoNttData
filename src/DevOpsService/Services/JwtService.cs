@@ -24,7 +24,7 @@ public class JwtService
             var tokenHandler = new JwtSecurityTokenHandler();
             Console.WriteLine("----- 2 ----- _secret=" + _secret);
             var key = Encoding.ASCII.GetBytes(_secret);
-            Console.WriteLine("----- 3 ----- key=" + key.ToString());
+            Console.WriteLine("----- 3 -----");
             tokenHandler.ValidateToken(token, new TokenValidationParameters
             {
                 ValidateIssuerSigningKey = true,

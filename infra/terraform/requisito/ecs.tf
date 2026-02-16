@@ -21,7 +21,7 @@ resource "aws_ecs_task_definition" "devops_task" {
       ]
       environment = [
         { name = "ASPNETCORE_ENVIRONMENT", value = "Production" },
-        { name = "JWT_SECRET", value = "REPLACE_WITH_SECRET" }
+        { name = "JWT_SECRET", value = "dev-secret-change-me-32bytes-long-key!!" }
       ]
       logConfiguration = {
         logDriver = "awslogs"
