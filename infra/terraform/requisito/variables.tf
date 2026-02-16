@@ -21,6 +21,11 @@ variable "desired_count" {
   default = 2
 }
 
+variable "image_tag" {
+  description = "Tag de la imagen Docker"
+  type        = string
+}
+
 variable "env" {
   type = string
 }

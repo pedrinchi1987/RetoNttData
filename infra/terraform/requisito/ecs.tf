@@ -12,7 +12,7 @@ resource "aws_ecs_task_definition" "devops_task" {
   container_definitions = jsonencode([
     {
       name  = "${var.service_name}-${var.env}"
-      image = "${aws_ecr_repository.devops_repo.repository_url}:latest"
+      image = "${aws_ecr_repository.devops_repo.repository_url}:${var.image_tag}"
       portMappings = [
         {
           containerPort = 80
