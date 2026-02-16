@@ -10,13 +10,14 @@ trigger:
       - develop
       - feature/*
       - release/*
-      - master
+      - main
 
-pr:
-  branches:
-    include:
-      - develop
-      - master
+# Permite ejecución manual con variables (Run pipeline -> Run with parameters)
+parameters:
+  - name: imageTagManual
+    displayName: 'Image tag (leave empty to use Build.BuildId)'
+    type: string
+    default: ''
 
 variables:
   # Defaults - override in pipeline library or at run-time
@@ -26,16 +27,19 @@ variables:
   terraformWorkingDir: 'infra/terraform'
   buildConfiguration: 'Release'
   dotnetSdk: '8.0.x'
-  # Use Build.BuildId if no imageTag provided
-  imageTag: $(Build.BuildId) 
   # Service connections and secrets (must create these in Azure DevOps project)
   awsCredentialsEnvVar: 'AWS'                            # We will pass AWS_ACCESS_KEY_ID & AWS_SECRET_ACCESS_KEY
   sonarCloudServiceConnection: 'SonarOnline'
   sonarOrganization: 'pedrinchi1987'                    # change
   sonarProjectKey: 'pedrinchi1987_RetoNttData'  # 'pmontenegro_devops-service'
+  # Variable dependiente de la branch
+  ${{ if ne(parameters.imageTagManual, '') }}:
+    imageTag: ${{ parameters.imageTagManual }}
+  ${{ else }}:
+    imageTag: $(Build.BuildId)
   BRANCH_NAME: $(Build.SourceBranch)
   # Variable dependiente de la branch
-  ${{ if eq(variables['Build.SourceBranchName'], 'master') }}:
+  ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
     environmentName: 'prod'
   ${{ elseif startsWith(variables['Build.SourceBranchName'], 'release/') }}:
     environmentName: 'qa'
@@ -53,6 +57,7 @@ stages:
 # 1) Build & Restore    #
 #########################
 - stage: Build
+  condition: ${{ eq(parameters.imageTagManual, '') }}
   displayName: 'Build'
   jobs:
     - job: RestoreBuild
@@ -81,6 +86,7 @@ stages:
 # 2) Test               #
 #########################
 - stage: Test
+  condition: ${{ eq(parameters.imageTagManual, '') }}
   displayName: 'Test'
   dependsOn: Build
   jobs:
@@ -123,7 +129,7 @@ stages:
 - stage: Analyze
   displayName: 'Static Analysis (SonarCloud)'
   dependsOn: Test
-  condition: succeeded()
+  condition: and(succeeded(), ${{ eq(parameters.imageTagManual, '') }})
   jobs:
     - job: Sonar
       displayName: 'Run SonarCloud analysis'
@@ -138,15 +144,14 @@ stages:
             projectKey: $(sonarProjectKey)
             projectName: $(sonarProjectKey)
             extraProperties: |
-              sonar.branch.name=master
-              sonar.cs.opencover.reportsPaths=$(System.DefaultWorkingDirectory)/*/TestResults/test-results.trx
-
+              sonar.branch.name=$(BRANCH_NAME)
+              sonar.cs.opencover.reportsPaths=$(Build.SourcesDirectory)/coverage.opencover.xml
 
         - script: |
             dotnet tool install --global dotnet-sonarscanner
             export PATH="$PATH:/root/.dotnet/tools"
             dotnet build src/DevOpsService/DevOpsService.csproj -c $(buildConfiguration)
-            dotnet test tests/DevOpsService.Tests/DevOpsService.Tests.csproj --configuration $(buildConfiguration) --logger "trx;LogFileName=test-results.trx" /p:CollectCoverage=true /p:CoverletOutput=$(Build.SourcesDirectory)/coverage.cobertura.xml /p:CoverletOutputFormat=cobertura
+            dotnet test tests/DevOpsService.Tests/DevOpsService.Tests.csproj --configuration $(buildConfiguration) --logger "trx;LogFileName=test-results.trx" /p:CollectCoverage=true /p:CoverletOutput=$(Build.SourcesDirectory)/coverage.opencover.xml /p:CoverletOutputFormat=opencover
           displayName: 'Run Sonar scanner'
         
         - task: SonarCloudAnalyze@2
@@ -161,6 +166,7 @@ stages:
 ######################################
 - stage: Deploy_Prerequisitos
   displayName: 'Deploy to Prerequisitos'
+  condition: ${{ ne(variables.imageTag, '') }}
   jobs:
     - job: DeployToPrerequisitos
       displayName: 'Terraform apply -> Prerequisitos'
@@ -196,8 +202,8 @@ stages:
         - script: |
             cd $(terraformWorkingDir)/requisito
             terraform init
-            terraform plan -var="env=$(environmentName)" -var="aws_access_key=$(AWS_ACCESS_KEY_ID)" -var="aws_secret_key=$(AWS_SECRET_ACCESS_KEY)" -var="aws_region=$(awsRegion)" -var="service_name=$(serviceName)" -var="desired_count=2" -var="image_tag=$(Build.BuildId)"
-            terraform apply -var="env=$(environmentName)" -var="aws_access_key=$(AWS_ACCESS_KEY_ID)" -var="aws_secret_key=$(AWS_SECRET_ACCESS_KEY)" -var="aws_region=$(awsRegion)" -var="service_name=$(serviceName)" -var="desired_count=2" -var="image_tag=$(Build.BuildId)" -auto-approve
+            terraform plan -var="env=$(environmentName)" -var="aws_access_key=$(AWS_ACCESS_KEY_ID)" -var="aws_secret_key=$(AWS_SECRET_ACCESS_KEY)" -var="aws_region=$(awsRegion)" -var="service_name=$(serviceName)" -var="desired_count=2" -var="image_tag=$(imageTag)"
+            terraform apply -var="env=$(environmentName)" -var="aws_access_key=$(AWS_ACCESS_KEY_ID)" -var="aws_secret_key=$(AWS_SECRET_ACCESS_KEY)" -var="aws_region=$(awsRegion)" -var="service_name=$(serviceName)" -var="desired_count=2" -var="image_tag=$(imageTag)" -auto-approve
           displayName: 'Terraform init/plan/apply (requisito)'
 
 
@@ -205,6 +211,7 @@ stages:
 # 5) Build & Push Image #
 #########################
 - stage: PublishImage
+  condition: ${{ eq(parameters.imageTagManual, '') }}
   displayName: '🐳 Build & Push Docker Image'
   jobs:
     - job: DockerBuildPush
@@ -231,11 +238,11 @@ stages:
 
         - script: |
             echo "🐳 Building Docker image..."
-            docker build -t $(awsAccountId).dkr.ecr.$(awsRegion).amazonaws.com/$(ecrRepository):$(Build.BuildId) -f src/DevOpsService/Dockerfile .
-            docker tag $(awsAccountId).dkr.ecr.$(awsRegion).amazonaws.com/$(ecrRepository):$(Build.BuildId) $(awsAccountId).dkr.ecr.$(awsRegion).amazonaws.com/$(ecrRepository):latest
+            docker build -t $(awsAccountId).dkr.ecr.$(awsRegion).amazonaws.com/$(ecrRepository):$(imageTag) -f src/DevOpsService/Dockerfile .
+            docker tag $(awsAccountId).dkr.ecr.$(awsRegion).amazonaws.com/$(ecrRepository):$(imageTag) $(awsAccountId).dkr.ecr.$(awsRegion).amazonaws.com/$(ecrRepository):latest
 
             echo "📤 Pushing image..."
-            docker push $(awsAccountId).dkr.ecr.$(awsRegion).amazonaws.com/$(ecrRepository):$(Build.BuildId)
+            docker push $(awsAccountId).dkr.ecr.$(awsRegion).amazonaws.com/$(ecrRepository):$(imageTag)
             docker push $(awsAccountId).dkr.ecr.$(awsRegion).amazonaws.com/$(ecrRepository):latest
           env:
             AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
@@ -252,6 +259,7 @@ stages:
 # 6) Deploy to Staging general       #
 ######################################
 - stage: Deploy_General
+  condition: ${{ eq(parameters.imageTagManual, '') }}
   displayName: 'Deploy to General'
   jobs:
     - job: DeployToGeneral
