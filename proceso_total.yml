@@ -145,7 +145,7 @@ stages:
             projectName: $(sonarProjectKey)
             extraProperties: |
               sonar.branch.name=$(BRANCH_NAME)
-              sonar.coverageReportPaths=$(Build.SourcesDirectory)/coverage.cobertura.xml
+              sonar.cs.cobertura.reportsPaths==$(Build.SourcesDirectory)/coverage.cobertura.xml
 
         - script: |
             dotnet tool install --global dotnet-sonarscanner
