@@ -145,7 +145,8 @@ stages:
             projectName: $(sonarProjectKey)
             extraProperties: |
               sonar.branch.name=$(BRANCH_NAME)
-              sonar.cs.opencover.reportsPaths=$(System.DefaultWorkingDirectory)/**/*/TestResults/test-results.trx
+              sonar.cs.opencover.reportsPaths=$(System.DefaultWorkingDirectory)/**/*/TestResults/test-results.trx              
+              sonar.coverageReportPaths=$(Build.SourcesDirectory)/coverage.cobertura.xml
 
 
         - script: |
