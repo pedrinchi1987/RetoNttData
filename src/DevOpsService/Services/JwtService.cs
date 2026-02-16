@@ -19,12 +19,12 @@ public class JwtService
         jti = string.Empty;
         subject = null;
         try
-        {            
-            Console.WriteLine("----- 1 ----- token="+token);
+        {
+            Console.WriteLine("----- 1 ----- token=" + token);
             var tokenHandler = new JwtSecurityTokenHandler();
-            Console.WriteLine("----- 2 ----- _secret="+_secret);
+            Console.WriteLine("----- 2 ----- _secret=" + _secret);
             var key = Encoding.ASCII.GetBytes(_secret);
-            Console.WriteLine("----- 3 ----- key="+key);
+            Console.WriteLine("----- 3 ----- key=" + key);
             tokenHandler.ValidateToken(token, new TokenValidationParameters
             {
                 ValidateIssuerSigningKey = true,

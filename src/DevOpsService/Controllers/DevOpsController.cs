@@ -22,6 +22,10 @@ public class DevOpsController : ControllerBase
     [HttpPost]
     public IActionResult Post([FromBody] DevOpsRequest request)
     {
+        Console.WriteLine("API_KEY=" + API_KEY);
+        Request.Headers.TryGetValue("X-Parse-REST-API-Key", out var apiKey2);
+        Console.WriteLine("apiKey2=" + apiKey2);
+        
         if (!Request.Headers.TryGetValue("X-Parse-REST-API-Key", out var apiKey) || apiKey != API_KEY)
             return Unauthorized(new { error = "Invalid API Key" });
 
