@@ -34,7 +34,7 @@ variables:
   sonarProjectKey: 'pedrinchi1987_RetoNttData'  # 'pmontenegro_devops-service'
   # Variable dependiente de la branch
   ${{ if ne(parameters.imageTagManual, '') }}:
-    imageTag: $(imageTagManual)
+    imageTag: ${{ parameters.imageTagManual }}
   ${{ else }}:
     imageTag: $(Build.BuildId)
   BRANCH_NAME: $(Build.SourceBranch)
