@@ -144,8 +144,6 @@ stages:
             projectKey: $(sonarProjectKey)
             projectName: $(sonarProjectKey)
             extraProperties: |
-              sonar.sources=src
-              sonar.tests=tests
               sonar.branch.name=$(BRANCH_NAME)
               sonar.cs.opencover.reportsPaths=$(Build.SourcesDirectory)/coverage.opencover.xml
 
