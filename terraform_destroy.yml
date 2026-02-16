@@ -18,7 +18,7 @@ variables:
   awsCredentialsEnvVar: 'Amazon_Pedrinchi'                            # We will pass AWS_ACCESS_KEY_ID & AWS_SECRET_ACCESS_KEY
   BRANCH_NAME: $(Build.SourceBranch)
   serviceName: 'devops-service'
-  ${{ if eq(variables['Build.SourceBranchName'], 'master') }}:
+  ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
     environmentName: 'prod'
   ${{ elseif startsWith(variables['Build.SourceBranchName'], 'release/') }}:
     environmentName: 'qa'
