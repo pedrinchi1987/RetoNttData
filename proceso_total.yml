@@ -34,7 +34,7 @@ variables:
   sonarProjectKey: 'pedrinchi1987_RetoNttData'  # 'pmontenegro_devops-service'
   BRANCH_NAME: $(Build.SourceBranch)  
   # Variable dependiente de la branch
-  ${{ if ne(parameters['imageTagManual'], '') }}:
+  ${{ if ne(parameters.imageTagManual, '') }}:
     imageTag: $(imageTagManual)
   ${{ else }}:
     imageTag: $(Build.BuildId)
@@ -57,7 +57,7 @@ stages:
 # 1) Build & Restore    #
 #########################
 - stage: Build
-  condition: ne(parameters['imageTagManual'], '')
+  condition: ne(parameters.imageTagManual, '')
   displayName: 'Build'
   jobs:
     - job: RestoreBuild
@@ -86,7 +86,7 @@ stages:
 # 2) Test               #
 #########################
 - stage: Test
-  condition: ne(parameters['imageTagManual'], '')
+  condition: ne(parameters.imageTagManual, '')
   displayName: 'Test'
   dependsOn: Build
   jobs:
@@ -127,7 +127,7 @@ stages:
 # 3) Static analysis    #
 #########################
 - stage: Analyze
-  condition: ne(parameters['imageTagManual'], '')
+  condition: ne(parameters.imageTagManual, '')
   displayName: 'Static Analysis (SonarCloud)'
   dependsOn: Test
   condition: succeeded()
@@ -212,7 +212,7 @@ stages:
 # 5) Build & Push Image #
 #########################
 - stage: PublishImage
-  condition: ne(parameters['imageTagManual'], '')
+  condition: ne(parameters.imageTagManual, '')
   displayName: '🐳 Build & Push Docker Image'
   jobs:
     - job: DockerBuildPush
@@ -260,7 +260,7 @@ stages:
 # 6) Deploy to Staging general       #
 ######################################
 - stage: Deploy_General
-  condition: ne(parameters['imageTagManual'], '')
+  condition: ne(parameters.imageTagManual, '')
   displayName: 'Deploy to General'
   jobs:
     - job: DeployToGeneral
