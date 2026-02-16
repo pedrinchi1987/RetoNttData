@@ -166,7 +166,7 @@ stages:
 ######################################
 - stage: Deploy_Prerequisitos
   displayName: 'Deploy to Prerequisitos'
-  condition: ${{ ne(variables.imageTag, '') }}
+  condition: and(succeeded(), ${{ ne(variables.imageTag, '') }})
   jobs:
     - job: DeployToPrerequisitos
       displayName: 'Terraform apply -> Prerequisitos'
@@ -211,7 +211,7 @@ stages:
 # 5) Build & Push Image #
 #########################
 - stage: PublishImage
-  condition: ${{ eq(parameters.imageTagManual, '') }}
+  condition: and(succeeded(), ${{ eq(parameters.imageTagManual, '') }})
   displayName: '🐳 Build & Push Docker Image'
   jobs:
     - job: DockerBuildPush
@@ -259,7 +259,7 @@ stages:
 # 6) Deploy to Staging general       #
 ######################################
 - stage: Deploy_General
-  condition: ${{ eq(parameters.imageTagManual, '') }}
+  condition: and(succeeded(), ${{ eq(parameters.imageTagManual, '') }})
   displayName: 'Deploy to General'
   jobs:
     - job: DeployToGeneral
