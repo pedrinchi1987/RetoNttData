@@ -167,6 +167,7 @@ stages:
 ######################################
 - stage: Deploy_Prerequisitos
   displayName: 'Deploy to Prerequisitos'
+  condition: ${{ ne(variables.imageTag, '') }}
   jobs:
     - job: DeployToPrerequisitos
       displayName: 'Terraform apply -> Prerequisitos'
