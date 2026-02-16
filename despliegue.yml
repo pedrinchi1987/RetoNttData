@@ -1,0 +1,86 @@
+# azure-pipelines.yml
+# Pipeline multi-stage para Azure DevOps (Build, Test, Static Analysis, Push Image, Deploy Staging, Deploy Prod)
+# Soporta: automatic triggers, manual, tag-based versioned deployments, SonarCloud, Terraform for AWS, Docker -> ECR.
+
+name: Proceso de Despliegue Continua
+
+trigger:
+  none
+
+# Permite ejecución manual con variables (Run pipeline -> Run with parameters)
+parameters:
+  - name: imageTag
+    displayName: 'Image tag (leave empty to use Build.BuildId)'
+    type: string
+    default: ''
+  - name: deployTo
+    displayName: 'Deploy target (none | staging | production)'
+    type: string
+    default: 'none'
+
+variables:
+  # Defaults - override in pipeline library or at run-time
+  awsRegion: 'us-east-1'
+  awsAccountId: 340752837689
+  ecrRepository: 'devops-service'
+  serviceName: 'devops-service'
+  terraformWorkingDir: 'infra/terraform'
+  buildConfiguration: 'Release'
+  dotnetSdk: '8.0.x'
+  # Use Build.BuildId if no imageTag provided
+  imageTag: $(Build.BuildId) 
+  # Service connections and secrets (must create these in Azure DevOps project)
+  awsEcrServiceConnection: 'devops-service'   # Docker@2 uses this
+  awsCredentialsEnvVar: 'AWS'                            # We will pass AWS_ACCESS_KEY_ID & AWS_SECRET_ACCESS_KEY
+  sonarCloudServiceConnection: 'SonarOnline'
+  sonarOrganization: 'pmontenegro'                    # change
+  sonarProjectKey: 'pmontenegro_devops-service'
+
+stages:
+
+#########################
+# 4) Build & Push Image #
+#########################
+- stage: PublishImage
+  displayName: '🐳 Build & Push Docker Image'
+  jobs:
+    - job: DockerBuildPush
+      displayName: 'Docker Build and Push to ECR'
+      pool:
+        vmImage: 'ubuntu-latest'
+
+      steps:
+        - checkout: self
+
+        - script: |
+            echo "🔐 Logging in to Amazon ECR..."
+            aws --version
+            aws configure set aws_access_key_id $(AWS_ACCESS_KEY_ID)
+            aws configure set aws_secret_access_key $(AWS_SECRET_ACCESS_KEY)
+            aws configure set region $(awsRegion)
+            aws configure set output json
+            aws sts get-caller-identity
+            aws ecr get-login-password --region $(awsRegion) | docker login --username AWS --password-stdin $(awsAccountId).dkr.ecr.$(awsRegion).amazonaws.com
+          env:
+            AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
+            AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
+          displayName: '🔑 Login manual to ECR'
+
+        - script: |
+            echo "🐳 Building Docker image..."
+            docker build -t $(awsAccountId).dkr.ecr.$(awsRegion).amazonaws.com/$(ecrRepository):$(Build.BuildId) -f src/DevOpsService/Dockerfile .
+            docker tag $(awsAccountId).dkr.ecr.$(awsRegion).amazonaws.com/$(ecrRepository):$(Build.BuildId) $(awsAccountId).dkr.ecr.$(awsRegion).amazonaws.com/$(ecrRepository):latest
+
+            echo "📤 Pushing image..."
+            docker push $(awsAccountId).dkr.ecr.$(awsRegion).amazonaws.com/$(ecrRepository):$(Build.BuildId)
+            docker push $(awsAccountId).dkr.ecr.$(awsRegion).amazonaws.com/$(ecrRepository):latest
+          env:
+            AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
+            AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
+          displayName: '🐳 Build & Push Docker image'
+
+        - task: PublishPipelineArtifact@1
+          displayName: '📦 Publish image metadata'
+          inputs:
+            targetPath: '$(System.DefaultWorkingDirectory)'
+            artifact: 'image-info'

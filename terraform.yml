@@ -1,0 +1,85 @@
+# azure-pipelines.yml
+# Pipeline multi-stage para Azure DevOps (Build, Test, Static Analysis, Push Image, Deploy Staging, Deploy Prod)
+# Soporta: automatic triggers, manual, tag-based versioned deployments, SonarCloud, Terraform for AWS, Docker -> ECR.
+
+name: Ejecucion IAC Terraform
+
+trigger:
+  none
+
+# Permite ejecución manual con variables (Run pipeline -> Run with parameters)
+parameters:
+  - name: imageTag
+    displayName: 'Image tag (leave empty to use Build.BuildId)'
+    type: string
+    default: ''
+  - name: deployTo
+    displayName: 'Deploy target (none | staging | production)'
+    type: string
+    default: 'none'
+
+variables:
+  # Defaults - override in pipeline library or at run-time
+  awsRegion: 'us-east-1'
+  terraformWorkingDir: 'infra/terraform'
+    # Use Build.BuildId if no imageTag provided
+  imageTag: $(Build.BuildId) 
+  # Service connections and secrets (must create these in Azure DevOps project)
+  awsEcrServiceConnection: 'AWS_ECR_SERVICE_CONNECTION'   # Docker@2 uses this
+  awsCredentialsEnvVar: 'Amazon_Pedrinchi'                            # We will pass AWS_ACCESS_KEY_ID & AWS_SECRET_ACCESS_KEY
+  BRANCH_NAME: $(Build.SourceBranch)
+  serviceName: 'devops-service'
+  
+stages:
+
+#########################
+# 5) Deploy to Staging  #
+#########################
+- stage: Deploy_Staging
+  displayName: 'Deploy to Staging'
+  jobs:
+    - job: DeployToStaging
+      displayName: 'Terraform apply -> Staging'
+      pool:
+        vmImage: 'ubuntu-latest'
+      steps:
+        - checkout: self
+
+        # 1. Instalar Terraform (Solución Manual)
+        - script: |
+            TERRAFORM_VERSION="1.7.0"
+            wget https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip
+            unzip terraform_${TERRAFORM_VERSION}_linux_amd64.zip
+            sudo mv terraform /usr/local/bin/
+            terraform version
+          displayName: 'Install Terraform Manually'
+
+        - script: |
+            mkdir -p ~/.terraform.d
+            echo '{
+              "credentials": {
+                "app.terraform.io": {
+                  "token": "'$(TF_API_TOKEN)'"
+                }
+              }
+            }' > ~/.terraform.d/credentials.tfrc.json
+          displayName: 'Credenciales Terraform Cloud'
+          
+        - script: |
+            cd $(terraformWorkingDir)/lambda
+            npm init -y
+            npm install jsonwebtoken
+          displayName: 'Compilar Lambda'
+          
+        - script: |
+            cd $(terraformWorkingDir)
+            terraform init -input=false
+            terraform plan -var="env=$(BRANCH_NAME)" -var="aws_access_key=$(AWS_ACCESS_KEY_ID)" -var="aws_secret_key=$(AWS_SECRET_ACCESS_KEY)" -var="aws_region=$(awsRegion)" -var="service_name=$(serviceName)" -var="desired_count=2" -out=tfplan-staging
+            terraform apply -auto-approve tfplan-staging
+          displayName: 'Terraform init/plan/apply (staging)'
+
+        - script: |
+            echo "Staging deployed. Outputs:"
+            cd $(terraformWorkingDir)
+            terraform output -json
+          displayName: 'Terraform outputs'
