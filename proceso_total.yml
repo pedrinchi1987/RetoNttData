@@ -37,7 +37,7 @@ variables:
     imageTag: ${{ parameters.imageTagManual }}
   ${{ else }}:
     imageTag: $(Build.BuildId)
-  BRANCH_NAME: $(Build.SourceBranch)
+  BRANCH_NAME: $(Build.SourceBranchName)
   # Variable dependiente de la branch
   ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
     environmentName: 'prod'
