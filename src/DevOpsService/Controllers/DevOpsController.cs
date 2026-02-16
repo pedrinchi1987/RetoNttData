@@ -22,23 +22,23 @@ public class DevOpsController : ControllerBase
     [HttpPost]
     public IActionResult Post([FromBody] DevOpsRequest request)
     {
-        Console.WriteLine("AQUIIII");
-        Console.WriteLine("API_KEY=" + API_KEY);
-        Request.Headers.TryGetValue("X-Parse-REST-API-Key", out var apiKey2);
-        Console.WriteLine("apiKey2=" + apiKey2);
+        //Console.WriteLine("AQUIIII");
+        //Console.WriteLine("API_KEY=" + API_KEY);
+        //Request.Headers.TryGetValue("X-Parse-REST-API-Key", out var apiKey2);
+        //Console.WriteLine("apiKey2=" + apiKey2);
 
         if (!Request.Headers.TryGetValue("X-Parse-REST-API-Key", out var apiKey) || apiKey != API_KEY)
-            return Unauthorized(new { error = "Invalid API Keyshhhh" });
+            return Unauthorized(new { error = "Invalid API Key" });
 
         if (!Request.Headers.TryGetValue("X-JWT-KWY", out var jwt))
             return Unauthorized(new { error = "Missing JWT header" });
 
         var validation = _jwtService.ValidateToken(jwt, out var jwtId, out var subject);
-        Console.WriteLine("jwt=" + jwt);
-        Console.WriteLine("jwtId=" + jwtId);
-        Console.WriteLine("subject=" + subject);
+        //Console.WriteLine("jwt=" + jwt);
+        //Console.WriteLine("jwtId=" + jwtId);
+        //Console.WriteLine("subject=" + subject);
         if (!validation)
-            return Unauthorized(new { error = "Invalid JWT - (jwt= "+jwt+" ) - (jwtId="+jwtId+") - (subject="+subject+")" });
+            return Unauthorized(new { error = "Invalid JWT" });
 
         if (_cache.TryGetValue(jwtId, out _))
             return BadRequest(new { error = "JWT already used" });

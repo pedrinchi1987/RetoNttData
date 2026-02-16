@@ -20,11 +20,11 @@ public class JwtService
         subject = null;
         try
         {
-            Console.WriteLine("----- 1 ----- token=" + token);
+            //Console.WriteLine("----- 1 ----- token=" + token);
             var tokenHandler = new JwtSecurityTokenHandler();
-            Console.WriteLine("----- 2 ----- _secret=" + _secret);
+            //Console.WriteLine("----- 2 ----- _secret=" + _secret);
             var key = Encoding.ASCII.GetBytes(_secret);
-            Console.WriteLine("----- 3 -----");
+            //Console.WriteLine("----- 3 -----");
             tokenHandler.ValidateToken(token, new TokenValidationParameters
             {
                 ValidateIssuerSigningKey = true,
@@ -34,19 +34,19 @@ public class JwtService
                 ClockSkew = TimeSpan.FromSeconds(5)
             }, out var validatedToken);
 
-            Console.WriteLine("----- 4 -----");
+            //Console.WriteLine("----- 4 -----");
             var jwtToken = (JwtSecurityToken)validatedToken;
-            Console.WriteLine("----- 5 -----");
+            //Console.WriteLine("----- 5 -----");
             jti = jwtToken.Id;            
-            Console.WriteLine("----- 6 -----");
+            //Console.WriteLine("----- 6 -----");
             subject = jwtToken.Subject;            
-            Console.WriteLine("----- 7 -----");
+            //Console.WriteLine("----- 7 -----");
             return true;
         }
         catch
         {
-            Console.WriteLine(CreateJwt(_secret, subject,60));
-            Console.WriteLine("----- error -----");
+            //Console.WriteLine(CreateJwt(_secret, subject,60));
+            //Console.WriteLine("----- error -----");
             return false;
         }
     }
