@@ -32,12 +32,12 @@ variables:
   sonarCloudServiceConnection: 'SonarOnline'
   sonarOrganization: 'pedrinchi1987'                    # change
   sonarProjectKey: 'pedrinchi1987_RetoNttData'  # 'pmontenegro_devops-service'
-  BRANCH_NAME: $(Build.SourceBranch)  
   # Variable dependiente de la branch
   ${{ if ne(parameters.imageTagManual, '') }}:
     imageTag: $(imageTagManual)
   ${{ else }}:
     imageTag: $(Build.BuildId)
+  BRANCH_NAME: $(Build.SourceBranch)
   # Variable dependiente de la branch
   ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
     environmentName: 'prod'
@@ -127,10 +127,9 @@ stages:
 # 3) Static analysis    #
 #########################
 - stage: Analyze
-  condition: ne(parameters.imageTagManual, '')
   displayName: 'Static Analysis (SonarCloud)'
   dependsOn: Test
-  condition: succeeded()
+  condition: and(succeeded(), ne(parameters.imageTagManual, ''))
   jobs:
     - job: Sonar
       displayName: 'Run SonarCloud analysis'
