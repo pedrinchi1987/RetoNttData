@@ -144,8 +144,8 @@ stages:
             projectKey: $(sonarProjectKey)
             projectName: $(sonarProjectKey)
             extraProperties: |
-              sonar.branch.name=master
-              sonar.cs.opencover.reportsPaths=$(System.DefaultWorkingDirectory)/*/TestResults/test-results.trx
+              sonar.branch.name=$(BRANCH_NAME)
+              sonar.cs.opencover.reportsPaths=$(System.DefaultWorkingDirectory)/**/*/TestResults/test-results.trx
 
 
         - script: |
@@ -239,7 +239,7 @@ stages:
         - script: |
             echo "🐳 Building Docker image..."
             docker build -t $(awsAccountId).dkr.ecr.$(awsRegion).amazonaws.com/$(ecrRepository):$(imageTag) -f src/DevOpsService/Dockerfile .
-            docker tag $(awsAccountId).dkr.ecr.$(awsRegion).amazonaws.com/$(ecrRepository):$(imageTagd) $(awsAccountId).dkr.ecr.$(awsRegion).amazonaws.com/$(ecrRepository):latest
+            docker tag $(awsAccountId).dkr.ecr.$(awsRegion).amazonaws.com/$(ecrRepository):$(imageTag) $(awsAccountId).dkr.ecr.$(awsRegion).amazonaws.com/$(ecrRepository):latest
 
             echo "📤 Pushing image..."
             docker push $(awsAccountId).dkr.ecr.$(awsRegion).amazonaws.com/$(ecrRepository):$(imageTag)
