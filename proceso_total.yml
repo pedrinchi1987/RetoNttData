@@ -10,13 +10,7 @@ trigger:
       - develop
       - feature/*
       - release/*
-      - master
-
-pr:
-  branches:
-    include:
-      - develop
-      - master
+      - main
 
 variables:
   # Defaults - override in pipeline library or at run-time
@@ -35,7 +29,7 @@ variables:
   sonarProjectKey: 'pedrinchi1987_RetoNttData'  # 'pmontenegro_devops-service'
   BRANCH_NAME: $(Build.SourceBranch)
   # Variable dependiente de la branch
-  ${{ if eq(variables['Build.SourceBranchName'], 'master') }}:
+  ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
     environmentName: 'prod'
   ${{ elseif startsWith(variables['Build.SourceBranchName'], 'release/') }}:
     environmentName: 'qa'
