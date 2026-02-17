@@ -4,5 +4,10 @@ data "aws_ecs_task_definition" "devops_task" {
 }
 
 output "devops_task" {
-  value = data.aws_ecs_task_definition.devops_task
+  value = data.aws_ecs_task_definition.devops_task.container_definitions
 }
+
+output "devops_task2" {
+  value = try(data.aws_ecs_task_definition.devops_task.container_definitions[0].image, "ERROR")
+}
+
