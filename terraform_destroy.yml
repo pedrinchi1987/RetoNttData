@@ -117,9 +117,8 @@ stages:
           
         - script: |
             cd $(terraformWorkingDir)/requisito
-            terraform init
-            terraform plan -var="env=$(environmentName)" -var="aws_access_key=$(AWS_ACCESS_KEY_ID)" -var="aws_secret_key=$(AWS_SECRET_ACCESS_KEY)" -var="aws_region=$(awsRegion)" -var="service_name=$(serviceName)" -var="desired_count=2" -var="image_tag=$(imageTag)
-            terraform destroy -auto-approve -var="env=$(environmentName)" -var="aws_access_key=$(AWS_ACCESS_KEY_ID)" -var="aws_secret_key=$(AWS_SECRET_ACCESS_KEY)" -var="aws_region=$(awsRegion)" -var="service_name=$(serviceName)" -var="desired_count=2" -var="image_tag=$(imageTag)
+            terraform init            
+            terraform destroy -auto-approve -var="env=$(environmentName)" -var="aws_access_key=$(AWS_ACCESS_KEY_ID)" -var="aws_secret_key=$(AWS_SECRET_ACCESS_KEY)" -var="aws_region=$(awsRegion)" -var="service_name=$(serviceName)" -var="desired_count=2" -var="null"
           displayName: 'Terraform init/plan/destroy (staging)'
 
         - script: |
