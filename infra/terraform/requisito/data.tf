@@ -8,6 +8,6 @@ output "devops_task" {
 }
 
 output "devops_task2" {
-  value = try(data.aws_ecs_task_definition.devops_task.container_definitions[0].image, "ERROR")
+  value = try(jsondecode(data.aws_ecs_task_definition.devops_task.container_definitions)[0].image, "ERROR")
 }
 
