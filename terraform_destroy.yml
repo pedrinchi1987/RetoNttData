@@ -4,6 +4,7 @@
 
 name: Destroy IAC Terraform
 
+pr: none
 trigger:
   none
 

@@ -4,6 +4,7 @@
 
 name: Proceso de Integracion Continua
 
+pr: none
 trigger:
   branches:
     include:
