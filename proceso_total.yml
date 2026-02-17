@@ -86,7 +86,7 @@ stages:
 # 2) Test               #
 #########################
 - stage: Test
-  condition: ${{ eq(parameters.imageTagManual, '') }}
+  condition: and(succeeded(), ${{ eq(parameters.imageTagManual, '') }})
   displayName: 'Test'
   dependsOn: Build
   jobs:
